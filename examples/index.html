@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, maximum-scale=1, minimum-scale=1, user-scalable=no, shrink-to-fit=no">
+	<title>React Slide Select Demo</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" />
+	<link rel="stylesheet" href="../styles.css" />
+	<style>
+		header{
+			background-color: #369;
+			color: #fff;
+		}
+		h1{
+			text-align: center;
+			font-weight: bold;
+			line-height: 3em;
+		}
+		section{
+			box-shadow: inset 0 0.5em 0.5em rgba(0,0,0,0.1);
+			padding: 2em 0;
+		}
+	</style>
+</head>
+<body>
+	<header>
+		<div class="container">
+			<div class="row">
+				<h1>Welcome to the React Slide Select Demo</h1>
+			</div>
+		</div>
+	</header>
+	<section>
+		<div class="container">
+			<div class="row">
+				<div class="col-sm-offset-2 col-sm-8">
+					<p>Here are some react-slide-select demos. This slider provides two features, and 2 features only. 1: You can swipe through a list of "slides". 2: You may "select" one of them, at which point a callback runs I suppose.</p>
+					<h2>Example 1: A "Hero" styled slider</h2>
+					<p>In this example, we see a "Hero" styled slider in the wild. This creature has 4 distinct parts of its body. The landing slide has multiple inner call-to-actions, the information only slide has no interactivity, the promotion slide is selectable from anywhere on its surface.</p>
+				</div>
+			</div>
+		</div>
+	</section>
+	<section>
+		<div class="container">
+			<div class="row">
+				<div id="example-hero">Component not loaded</div>
+			</div>
+		</div>
+	</section>
+	<script src="../node_modules/react/dist/react.js"></script>
+	<script src="../node_modules/react-dom/dist/react-dom.js"></script>
+	<script src="../lib/react-slide-select.js"></script>
+	<script src="./example-hero.js"></script>
+</body>
+</html>

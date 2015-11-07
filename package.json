@@ -1,0 +1,20 @@
+{
+  "name": "react-slide-select",
+  "version": "0.0.1",
+  "description": "",
+  "main": "lib/react-slide-select.js",
+  "scripts": {
+    "postinstall": "npm run build",
+    "build": "babel ./src --out-dir ./lib --presets react"
+  },
+  "author": "Admiral Potato, Mike Easley",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-cli": "^6.1.2",
+    "babel-preset-react": "^6.1.2"
+  },
+  "dependencies": {
+    "react": "^0.14.2",
+    "react-dom": "^0.14.2"
+  }
+}
