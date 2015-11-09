@@ -5,12 +5,13 @@
   "main": "lib/react-slide-select.js",
   "scripts": {
     "postinstall": "npm run build",
-    "build": "babel ./src --out-dir ./lib --presets react"
+    "build": "babel ./src --out-dir ./lib --presets react,es2015 --source-maps"
   },
   "author": "Admiral Potato, Mike Easley",
   "license": "MIT",
   "devDependencies": {
     "babel-cli": "^6.1.2",
+    "babel-preset-es2015": "^6.1.2",
     "babel-preset-react": "^6.1.2"
   },
   "dependencies": {

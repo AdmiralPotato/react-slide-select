@@ -1,5 +1,5 @@
 var Slide = React.createClass({
-	render(){
+	render (){
 		return (
 			<li style={{backgroundColor: this.props.color}}>
 				{this.props.slideName}
@@ -9,7 +9,7 @@ var Slide = React.createClass({
 });
 
 var SlideSelect = React.createClass({
-	getInitialState: function(){
+	getInitialState: function () {
 		return {
 			x: 0,
 			momentum: 0
@@ -19,10 +19,10 @@ var SlideSelect = React.createClass({
 		this.state.momentum *= 0.95;
 		var xPosition = this.state.x += this.state.momentum;
 		var childList = [];
-		this.props.items.forEach(function(item, index){
+		this.props.items.forEach(function (item, index) {
 			var color = `hsl(${Math.round(Math.random() * 360)}, 100%, 50%)`;
 			childList.push(
-				<Slide key={index} slideName={item} color={color} />
+				<Slide key={index} slideName={item} color={color}/>
 			);
 		});
 		return (
