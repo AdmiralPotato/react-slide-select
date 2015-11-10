@@ -1,0 +1,57 @@
+.SlideSelect {
+	position: relative;
+	display: block;
+	overflow: hidden;
+	height: 12rem;
+	text-align: center;
+	* {
+		margin: 0;
+		padding: 0;
+		display: block;
+	}
+	> ul {
+		&.slideList {
+			position: absolute;
+			font-size: 0;
+			> li {
+				display: inline-block;
+				font-size: 2rem;
+				width: 100%;
+				height: 12rem;
+				line-height: 12rem;
+			}
+		}
+		&.dotList {
+			position: absolute;
+			bottom: 0;
+			display: block;
+			font-size: 0;
+			width: 100%;
+			height: 3rem;
+			> li {
+				display: inline-block;
+				> a {
+					display: block;
+					padding: 0 1rem;
+					cursor: pointer;
+					> span {
+						display: none;
+					}
+					&:before {
+						display: block;
+						content: '\2022';
+						font-size: 5rem;
+						line-height: 3rem;
+						color: #fff;
+					}
+					&:hover:before {
+						color: #ccc;
+					}
+				}
+				&.active > a:before {
+					color: #000;
+				}
+			}
+		}
+	}
+}
