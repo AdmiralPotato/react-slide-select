@@ -20,12 +20,28 @@ var Dot = React.createClass({
 });
 
 var Slide = React.createClass({
+	getDefaultProps(){
+		return {
+			color: '#369',
+			width: 0,
+			touchStart: () => {
+			},
+			touchMove: () => {
+			}
+		}
+	},
 	render(){
+		var slide = this;
+		var slideOptions = {
+			style: {
+				backgroundColor: slide.props.color,
+				width: slide.props.width + 'px'
+			},
+			onTouchStart: slide.props.touchStart,
+			onTouchMove: slide.props.touchMove
+		};
 		return (
-			<li style={{
-				backgroundColor: this.props.color,
-				width: this.props.width + 'px'
-			}}>
+			<li {...slideOptions}>
 				{this.props.slideName}
 			</li>
 		);
@@ -45,7 +61,8 @@ var SlideSelect = React.createClass({
 			momentum: 0,
 			width: 0,
 			needsResizeUpdate: true,
-			targetIndex: 0
+			targetIndex: 0,
+			touchStartX: 0
 		};
 	},
 	componentDidUpdate(){
@@ -78,9 +95,35 @@ var SlideSelect = React.createClass({
 	},
 	changeIndex(index){
 		this.setState({
+			momentum: 0,
 			targetIndex: index,
 			x: this.state.width * index
 		});
+	},
+	startMomentum(syntheticTouchStartEvent){
+		console.log(syntheticTouchStartEvent);
+		var slider = this;
+		var startX = syntheticTouchStartEvent.touches[0].clientX;
+		slider.setState({
+			touchStartX: startX
+		});
+	},
+	addMomentum(syntheticTouchMoveEvent){
+		console.log(syntheticTouchMoveEvent);
+		var slider = this;
+		var incomingMomentum = slider.state.touchStartX - syntheticTouchMoveEvent.touches[0].clientX;
+		var tick = function(time) {
+			var momentum = slider.state.momentum > 0.1 ? slider.state.momentum * 0.7 : 0;
+			momentum += incomingMomentum ? incomingMomentum * 0.01 : 0;
+			slider.setState({
+				momentum: momentum,
+				x: slider.state.x += momentum
+			});
+			if(momentum !== 0){
+				requestAnimationFrame(tick);
+			}
+		};
+		requestAnimationFrame(tick);
 	},
 	getSlides(){
 		var slider = this;
@@ -90,14 +133,18 @@ var SlideSelect = React.createClass({
 			style: {
 				left: -slider.state.x + 'px',
 				width: (slider.props.items.length * slider.state.width) + 'px'
-			}
+			},
+			onTouchStart: slider.startMomentum,
+			onTouchMove: slider.addMomentum
 		};
 		slider.props.items.forEach(function(item, index) {
 			var slideProps = {
 				key: 'slide-' + index,
 				slideName: item,
 				color: `hsl(${Math.round((index / slider.props.items.length) * 360)}, 100%, 50%)`,
-				width: slider.state.width
+				width: slider.state.width,
+				touchStart: slider.startMomentum,
+				touchMove: slider.addMomentum
 			};
 			slideList.push(
 				<Slide {...slideProps} />
@@ -130,7 +177,7 @@ var SlideSelect = React.createClass({
 				);
 			});
 			result = (
-				<ul className="dotList">
+				<ul className="dotList" onTouchMove={this.addMomentum}>
 					{dotList}
 				</ul>
 			);
@@ -144,8 +191,7 @@ var SlideSelect = React.createClass({
 		return (
 			<div className="SlideSelectHolder" ref="holder">
 				<div className="SlideSelect">
-					{slides}
-					{dots}
+					{slides}					{dots}
 				</div>
 			</div>
 		);
