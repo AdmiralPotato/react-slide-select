@@ -1,96 +1,109 @@
-.SlideSelect {
-  box-sizing: border-box;
+.SlideSelectHolder {
   position: relative;
-  display: block;
-  overflow: hidden;
+  box-sizing: border-box;
   text-align: center; }
-  .SlideSelect * {
+  .SlideSelectHolder * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
     display: block; }
-  .SlideSelect > ul.slideList {
-    position: absolute;
+  .SlideSelectHolder .SlideSelect {
+    position: relative;
+    display: block;
     overflow: hidden; }
-    .SlideSelect > ul.slideList > li {
-      display: block;
-      float: left;
-      font-size: 1.5rem; }
-  .SlideSelect > ul.dotList {
+    .SlideSelectHolder .SlideSelect > ul {
+      list-style-type: none; }
+      .SlideSelectHolder .SlideSelect > ul.slideList {
+        position: relative;
+        overflow: hidden; }
+        .SlideSelectHolder .SlideSelect > ul.slideList > li {
+          display: block;
+          float: left;
+          font-size: 1.5rem; }
+    .SlideSelectHolder .SlideSelect.product > ul.slideList > li {
+      padding: 0 0.5rem; }
+      .SlideSelectHolder .SlideSelect.product > ul.slideList > li > a {
+        display: block;
+        cursor: pointer; }
+        .SlideSelectHolder .SlideSelect.product > ul.slideList > li > a img {
+          width: 100%; }
+        .SlideSelectHolder .SlideSelect.product > ul.slideList > li > a span {
+          display: block;
+          padding: 0.25rem 0; }
+    .SlideSelectHolder .SlideSelect.hero {
+      height: 36rem; }
+      .SlideSelectHolder .SlideSelect.hero > ul.slideList > li {
+        height: 36rem;
+        line-height: 36rem; }
+    .SlideSelectHolder .SlideSelect.nativeScroll {
+      overflow-x: scroll;
+      overflow-scrolling: touch;
+      -webkit-overflow-scrolling: touch; }
+  .SlideSelectHolder ul.dotList {
     position: absolute;
     bottom: 0;
     display: block;
     font-size: 0;
     width: 100%;
-    height: 3rem; }
-    .SlideSelect > ul.dotList > li {
+    height: 3rem;
+    list-style-type: none; }
+    .SlideSelectHolder ul.dotList > li {
       display: inline-block; }
-      .SlideSelect > ul.dotList > li > a {
+      .SlideSelectHolder ul.dotList > li > a {
         display: block;
         padding: 0 1rem;
-        cursor: pointer; }
-        .SlideSelect > ul.dotList > li > a > span {
+        cursor: pointer;
+        text-decoration: none; }
+        .SlideSelectHolder ul.dotList > li > a > span {
           display: none; }
-        .SlideSelect > ul.dotList > li > a:before {
+        .SlideSelectHolder ul.dotList > li > a:before {
           display: block;
           content: '\2022';
           font-size: 5rem;
           line-height: 3rem;
           color: #fff; }
-        .SlideSelect > ul.dotList > li > a:hover:before {
+        .SlideSelectHolder ul.dotList > li > a:hover:before {
           color: #ccc; }
-      .SlideSelect > ul.dotList > li.active > a:before {
+      .SlideSelectHolder ul.dotList > li.active > a:before {
         color: #000; }
-  .SlideSelect .arrow {
+  .SlideSelectHolder .arrow {
     position: absolute;
+    top: 25%;
     display: block;
-    height: 100%; }
-    .SlideSelect .arrow.prev {
+    height: 50%; }
+    .SlideSelectHolder .arrow.prev {
       left: 0; }
-      .SlideSelect .arrow.prev > a:before {
-        content: '<'; }
-    .SlideSelect .arrow.next {
+      .SlideSelectHolder .arrow.prev > a {
+        border-radius: 0 2em 2em 0;
+        border-left: none; }
+        .SlideSelectHolder .arrow.prev > a:before {
+          content: '<'; }
+    .SlideSelectHolder .arrow.next {
       right: 0; }
-      .SlideSelect .arrow.next > a:before {
-        content: '>'; }
-    .SlideSelect .arrow > a {
+      .SlideSelectHolder .arrow.next > a {
+        border-radius: 2em 0 0 2em;
+        border-right: none; }
+        .SlideSelectHolder .arrow.next > a:before {
+          content: '>'; }
+    .SlideSelectHolder .arrow > a {
       display: block;
       height: 100%;
       width: 8rem;
       color: rgba(0, 0, 0, 0.125);
       text-decoration: none;
-      cursor: default; }
-      .SlideSelect .arrow > a:before {
+      cursor: default;
+      border: 0.25em solid #369; }
+      .SlideSelectHolder .arrow > a:before {
         position: absolute;
         display: block;
         line-height: 0;
         top: 50%;
         font-size: 8rem;
         width: 8rem; }
-      .SlideSelect .arrow > a > span {
+      .SlideSelectHolder .arrow > a > span {
         display: none; }
-    .SlideSelect .arrow.active > a {
+    .SlideSelectHolder .arrow.active > a {
       cursor: pointer;
       color: rgba(0, 0, 0, 0.55); }
-      .SlideSelect .arrow.active > a:hover {
+      .SlideSelectHolder .arrow.active > a:hover {
         color: #000; }
-  .SlideSelect.product {
-    height: 180px; }
-    .SlideSelect.product > ul.slideList > li {
-      padding: 0 0.25rem; }
-      .SlideSelect.product > ul.slideList > li > a {
-        display: block;
-        cursor: pointer; }
-        .SlideSelect.product > ul.slideList > li > a img {
-          width: 100%; }
-        .SlideSelect.product > ul.slideList > li > a span {
-          display: block;
-          padding: 0.25rem 0; }
-    @media screen and (min-width: 480px) {
-      .SlideSelect.product > ul.slideList > li > a {
-        height: 220px; } }
-  .SlideSelect.hero {
-    height: 36rem; }
-    .SlideSelect.hero > ul.slideList > li {
-      height: 36rem;
-      line-height: 36rem; }

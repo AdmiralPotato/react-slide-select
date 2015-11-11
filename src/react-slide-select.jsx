@@ -9,6 +9,7 @@ var Arrow = React.createClass({
 	},
 	click(syntheticClickEvent){
 		syntheticClickEvent.preventDefault();
+		syntheticClickEvent.stopPropagation();
 		if (this.props.active) {
 			this.props.prevNext(this.props.direction);
 		}
@@ -18,8 +19,8 @@ var Arrow = React.createClass({
 		var className = 'arrow ' + (this.props.direction === 1 ? 'next' : 'prev') + (arrow.props.active ? ' active' : '');
 		var content = (this.props.direction === 1 ? '>' : '<');
 		return (
-			<div className={className} onClick={arrow.click}>
-				<a><span>{content}</span></a>
+			<div className={className}>
+				<a onMouseDown={arrow.click} onTouchStart={arrow.click}><span>{content}</span></a>
 			</div>
 		);
 	}
@@ -32,7 +33,9 @@ var Dot = React.createClass({
 			index: 0
 		};
 	},
-	onClick(){
+	click(syntheticClickEvent){
+		syntheticClickEvent.preventDefault();
+		syntheticClickEvent.stopPropagation();
 		this.props.changeIndex(this.props.index);
 	},
 	render(){
@@ -40,7 +43,7 @@ var Dot = React.createClass({
 		var className = this.props.active ? 'active' : '';
 		return (
 			<li className={className}>
-				<a onClick={dot.onClick} title={dot.props.slideName}><span>{dot.props.index}</span></a>
+				<a onMouseDown={dot.click} onTouchStart={dot.click} title={dot.props.slideName}><span>{dot.props.index}</span></a>
 			</li>
 		);
 	}
@@ -153,6 +156,8 @@ var SlideSelect = React.createClass({
 	},
 	componentDidUpdate(){
 		this.updateDimensions();
+		var sliderElement = ReactDOM.findDOMNode(this.refs['slider']);
+		sliderElement.scrollLeft = this.state.x;
 	},
 	componentDidMount(){
 		window.addEventListener('resize', this.invalidateDimensions);
@@ -180,10 +185,11 @@ var SlideSelect = React.createClass({
 		}
 	},
 	changeIndex(index){
-		this.setState({
+		var slider = this;
+		slider.setState({
 			momentum: 0,
 			targetIndex: index,
-			x: this.state.width * index
+			x: this.state.width * index * slider.getProductWidthRatio()
 		});
 	},
 	prevNext(direction){
@@ -192,36 +198,7 @@ var SlideSelect = React.createClass({
 		if (index < 0) {
 			index = slider.props.items.length - index;
 		}
-		this.setState({
-			momentum: 0,
-			targetIndex: index,
-			x: slider.state.width * index
-		});
-	},
-	startMomentum(syntheticTouchStartEvent){
-		console.log(syntheticTouchStartEvent);
-		var slider = this;
-		var startX = syntheticTouchStartEvent.touches[0].clientX;
-		slider.setState({
-			touchStartX: startX
-		});
-	},
-	addMomentum(syntheticTouchMoveEvent){
-		console.log(syntheticTouchMoveEvent);
-		var slider = this;
-		var incomingMomentum = slider.state.touchStartX - syntheticTouchMoveEvent.touches[0].clientX;
-		var tick = function(time) {
-			var momentum = slider.state.momentum > 0.1 ? slider.state.momentum * 0.7 : 0;
-			momentum += incomingMomentum ? incomingMomentum * 0.01 : 0;
-			slider.setState({
-				momentum: momentum,
-				x: slider.state.x += momentum
-			});
-			if (momentum !== 0) {
-				requestAnimationFrame(tick);
-			}
-		};
-		requestAnimationFrame(tick);
+		slider.changeIndex(index);
 	},
 	getProductWidthRatio(){
 		var slider = this;
@@ -248,11 +225,8 @@ var SlideSelect = React.createClass({
 		var sliderProps = {
 			className: 'slideList',
 			style: {
-				left: -slider.state.x + 'px',
 				width: (slideWidth * slider.props.items.length) + 'px'
-			},
-			onTouchStart: slider.startMomentum,
-			onTouchMove: slider.addMomentum
+			}
 		};
 		var setLength = slider.props.items.length;
 		var onSelect = (something) => {
@@ -265,9 +239,7 @@ var SlideSelect = React.createClass({
 				index: index,
 				setLength: setLength,
 				width: slideWidth,
-				onSelect: onSelect,
-				touchStart: slider.startMomentum,
-				touchMove: slider.addMomentum
+				onSelect: onSelect
 			};
 			var SlideType = slideTypeMap[this.props.type];
 			slideList.push(
@@ -301,7 +273,7 @@ var SlideSelect = React.createClass({
 				);
 			});
 			result = (
-				<ul className="dotList" onTouchMove={this.addMomentum}>
+				<ul className="dotList">
 					{dotList}
 				</ul>
 			);
@@ -321,15 +293,19 @@ var SlideSelect = React.createClass({
 	},
 	render(){
 		var slider = this;
-		var className = `SlideSelect ${slider.props.type}`;
+		var slideSelectProps = {
+			ref: 'slider',
+			className: `SlideSelect nativeScroll ${slider.props.type}`
+		};
 		var slides = slider.getSlides();
 		var dots = slider.getDots();
 		var arrows = slider.getArrows();
 		return (
 			<div className="SlideSelectHolder" ref="holder">
-				<div className={className}>
-					{slides}{dots}{arrows}
+				<div {...slideSelectProps}>
+					{slides}
 				</div>
+				{dots}{arrows}
 			</div>
 		);
 	}

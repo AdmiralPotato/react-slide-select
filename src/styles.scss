@@ -1,8 +1,6 @@
-.SlideSelect {
-	box-sizing: border-box;
+.SlideSelectHolder {
 	position: relative;
-	display: block;
-	overflow: hidden;
+	box-sizing: border-box;
 	text-align: center;
 	* {
 		box-sizing: border-box;
@@ -10,63 +8,121 @@
 		padding: 0;
 		display: block;
 	}
-	> ul {
-		&.slideList {
-			position: absolute;
-			overflow: hidden;
-			> li {
-				display: block;
-				float: left;
-				font-size: 1.5rem;
+	.SlideSelect {
+		position: relative;
+		display: block;
+		overflow: hidden;
+		> ul {
+			list-style-type: none;
+			&.slideList {
+				position: relative;
+				overflow: hidden;
+				> li {
+					display: block;
+					float: left;
+					font-size: 1.5rem;
+				}
 			}
 		}
-		&.dotList {
-			position: absolute;
-			bottom: 0;
-			display: block;
-			font-size: 0;
-			width: 100%;
-			height: 3rem;
-			> li {
-				display: inline-block;
-				> a {
-					display: block;
-					padding: 0 1rem;
-					cursor: pointer;
-					> span {
-						display: none;
-					}
-					&:before {
+
+		&.product {
+			> ul.slideList {
+				> li {
+					padding: 0 0.5rem;
+					> a {
 						display: block;
-						content: '\2022';
-						font-size: 5rem;
-						line-height: 3rem;
-						color: #fff;
-					}
-					&:hover:before {
-						color: #ccc;
+						cursor: pointer;
+						img {
+							width: 100%;
+						}
+						span {
+							display: block;
+							padding: 0.25rem 0;
+						}
 					}
 				}
-				&.active > a:before {
-					color: #000;
+			}
+			@media screen and (min-width: 480px) {
+				> ul.slideList > li > a {
 				}
+			}
+		}
+
+		&.hero {
+			height: 36rem;
+			> ul {
+				&.slideList {
+					> li {
+						height: 36rem;
+						line-height: 36rem;
+					}
+				}
+			}
+		}
+		&.nativeScroll {
+			overflow-x: scroll;
+			overflow-scrolling: touch;
+			-webkit-overflow-scrolling: touch;
+		}
+	}
+
+	ul.dotList {
+		position: absolute;
+		bottom: 0;
+		display: block;
+		font-size: 0;
+		width: 100%;
+		height: 3rem;
+		list-style-type: none;
+		> li {
+			display: inline-block;
+			> a {
+				display: block;
+				padding: 0 1rem;
+				cursor: pointer;
+				text-decoration: none;
+				> span {
+					display: none;
+				}
+				&:before {
+					display: block;
+					content: '\2022';
+					font-size: 5rem;
+					line-height: 3rem;
+					color: #fff;
+				}
+				&:hover:before {
+					color: #ccc;
+				}
+			}
+			&.active > a:before {
+				color: #000;
 			}
 		}
 	}
 	.arrow {
 		position: absolute;
+		top: 25%;
 		display: block;
-		height: 100%;
+		height: 50%;
 		&.prev {
 			left: 0;
-			> a:before {
-				content: '<';
+			> a {
+				border-radius: 0 2em 2em 0;
+				border-left: none;
+				&:before {
+					content: '<';
+				}
 			}
 		}
 		&.next {
 			right: 0;
-			> a:before {
-				content: '>';
+			> a {
+				border-radius: 2em 0 0 2em;
+				border-right: none;
+				&:before {
+					content: '>';
+				}
 			}
 		}
 		> a {
@@ -76,6 +132,7 @@
 			color: rgba(0, 0, 0, 0.125);
 			text-decoration: none;
 			cursor: default;
+			border: 0.25em solid #369;
 			&:before {
 				position: absolute;
 				display: block;
@@ -93,43 +150,6 @@
 			color: rgba(0, 0, 0, 0.55);
 			&:hover {
 				color: #000;
-			}
-		}
-	}
-
-	&.product {
-		height: 180px;
-		> ul.slideList {
-			> li {
-				padding: 0 0.25rem;
-				> a {
-					display: block;
-					cursor: pointer;
-					img {
-						width: 100%;
-					}
-					span {
-						display: block;
-						padding: 0.25rem 0;
-					}
-				}
-			}
-		}
-		@media screen and (min-width: 480px) {
-			> ul.slideList > li > a {
-				height: 220px;
-			}
-		}
-	}
-
-	&.hero {
-		height: 36rem;
-		> ul {
-			&.slideList {
-				> li {
-					height: 36rem;
-					line-height: 36rem;
-				}
 			}
 		}
 	}
