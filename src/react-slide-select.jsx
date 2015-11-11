@@ -192,13 +192,50 @@ var SlideSelect = React.createClass({
 			});
 		}
 	},
+	createTransition(targetValues, duration){
+		var slider = this;
+		var startValues = {};
+		var propertyName, startTime;
+		var animationCallback = (time) => {
+			startTime = startTime === undefined ? time : startTime;
+			var currentValues = {};
+			var timeDiff = time - startTime;
+			var progressFraction = Math.min(1, Math.max(0, timeDiff / duration));
+			var propertyName;
+			var propertyDiff;
+			if(progressFraction !== 1){
+				requestAnimationFrame(animationCallback);
+			}
+			for(propertyName in targetValues){
+				if(targetValues.hasOwnProperty(propertyName)){
+					propertyDiff = targetValues[propertyName] - startValues[propertyName];
+					currentValues[propertyName] = startValues[propertyName] + (propertyDiff * progressFraction);
+				}
+			}
+			slider.setState(currentValues);
+		};
+		for(propertyName in targetValues){
+			if(targetValues.hasOwnProperty(propertyName)){
+				if(slider.state.hasOwnProperty(propertyName)){
+					startValues[propertyName] = slider.state[propertyName];
+				} else {
+					throw new Error(`Invalid property ${propertyName} - property does not exist on state object.`);
+				}
+			}
+		}
+		requestAnimationFrame(animationCallback);
+	},
 	changeIndex(index){
 		var slider = this;
 		slider.setState({
-			momentum: 0,
-			targetIndex: index,
-			x: this.state.width * index * slider.getProductWidthRatio()
+			targetIndex: index
 		});
+		slider.createTransition(
+			{
+				x: this.state.width * index * slider.getProductWidthRatio()
+			},
+			1000
+		);
 	},
 	prevNext(direction){
 		var slider = this;
@@ -220,7 +257,6 @@ var SlideSelect = React.createClass({
 					break;
 				}
 			}
-			console.log(slider.state.width, breakpoint.size);
 			result = 1 / breakpoint.visibleProducts;
 		}
 		return result;
