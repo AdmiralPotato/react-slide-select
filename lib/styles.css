@@ -24,7 +24,9 @@
       padding: 0 0.5rem; }
       .SlideSelectHolder .SlideSelect.product > ul.slideList > li > a {
         display: block;
-        cursor: pointer; }
+        cursor: pointer;
+        text-decoration: none;
+        color: #369; }
         .SlideSelectHolder .SlideSelect.product > ul.slideList > li > a img {
           width: 100%; }
         .SlideSelectHolder .SlideSelect.product > ul.slideList > li > a span {

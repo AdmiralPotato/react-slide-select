@@ -96,6 +96,10 @@ var ProductSlide = React.createClass({
 			setLength: 1
 		}
 	},
+	click(){
+		var slide = this;
+		slide.props.onSelect(slide.props.data);
+	},
 	render(){
 		var slide = this;
 		var slideOptions = {
@@ -107,7 +111,7 @@ var ProductSlide = React.createClass({
 		};
 		return (
 			<li {...slideOptions}>
-				<a onSelect={slide.props.onSelect}> <img src={slide.props.data.images[0].smallUrl}/>
+				<a onClick={this.click}> <img src={slide.props.data.images[0].smallUrl}/>
 					<span>{slide.props.data.name}</span> </a>
 			</li>
 		);
@@ -151,7 +155,8 @@ var SlideSelect = React.createClass({
 			width: 0,
 			needsResizeUpdate: true,
 			targetIndex: 0,
-			touchStartX: 0
+			touchStartX: 0,
+			supportsTouch: false
 		};
 	},
 	componentDidUpdate(){
@@ -180,7 +185,10 @@ var SlideSelect = React.createClass({
 			this.setState({
 				width: width,
 				x: width * this.state.targetIndex,
-				needsResizeUpdate: false
+				needsResizeUpdate: false,
+				//We tried feature detection.
+				//Even Modernizr's approach didn't work in all important cases. This is comprehensive _enough_.
+				supportsTouch: navigator.userAgent.indexOf('Mobile') !== -1
 			});
 		}
 	},
@@ -295,7 +303,7 @@ var SlideSelect = React.createClass({
 		var slider = this;
 		var slideSelectProps = {
 			ref: 'slider',
-			className: `SlideSelect ${window['ontouchstart'] ? '' : 'nativeScroll'} ${slider.props.type}`
+			className: `SlideSelect ${slider.state.supportsTouch ? 'nativeScroll ' : ''}${slider.props.type}`
 		};
 		var slides = slider.getSlides();
 		var dots = slider.getDots();
