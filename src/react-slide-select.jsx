@@ -1,3 +1,30 @@
+var Arrow = React.createClass({
+	getDefaultProps(){
+		return {
+			active: true,
+			direction: 1,
+			prevNext: () => {
+			}
+		}
+	},
+	click(syntheticClickEvent){
+		syntheticClickEvent.preventDefault();
+		if (this.props.active) {
+			this.props.prevNext(this.props.direction);
+		}
+	},
+	render() {
+		var arrow = this;
+		var className = 'arrow ' + (this.props.direction === 1 ? 'next' : 'prev') + (arrow.props.active ? ' active' : '');
+		var content = (this.props.direction === 1 ? '>' : '<');
+		return (
+			<div className={className} onClick={arrow.click}>
+				<a><span>{content}</span></a>
+			</div>
+		);
+	}
+});
+
 var Dot = React.createClass({
 	getDefaultProps(){
 		return {
@@ -19,22 +46,21 @@ var Dot = React.createClass({
 	}
 });
 
-var Slide = React.createClass({
+var HeroSlide = React.createClass({
 	getDefaultProps(){
 		return {
-			color: '#369',
+			data: 'Hero Name',
 			width: 0,
-			touchStart: () => {
-			},
-			touchMove: () => {
-			}
+			index: 0,
+			setLength: 1
 		}
 	},
 	render(){
 		var slide = this;
 		var slideOptions = {
+			slideName: slide.props.data,
 			style: {
-				backgroundColor: slide.props.color,
+				backgroundColor: `hsl(${Math.round((slide.props.index / slide.props.setLength) * 360)}, 100%, 50%)`,
 				width: slide.props.width + 'px'
 			},
 			onTouchStart: slide.props.touchStart,
@@ -42,17 +68,77 @@ var Slide = React.createClass({
 		};
 		return (
 			<li {...slideOptions}>
-				{this.props.slideName}
+				{slide.props.data}
 			</li>
 		);
 	}
 });
 
+var ProductSlide = React.createClass({
+	getDefaultProps(){
+		return {
+			data: {
+				brand: "FreshLook",
+				id: "000732",
+				manufacturer: "Alcon",
+				name: "FreshLook Colorblends",
+				images: [{
+					"smallUrl": "https://media.1800contacts.com/is/image/1800Contacts/mainproductimage?$image=1800Contacts/000732_demandware&fmt=png-alpha&wid=250&hei=138&op_sharpen=1",
+					"mediumUrl": "https://media.1800contacts.com/is/image/1800Contacts/mainproductimage?$image=1800Contacts/000732_demandware&fmt=png-alpha&wid=350&hei=193&op_sharpen=1",
+					"largeUrl": "https://media.1800contacts.com/is/image/1800Contacts/mainproductimage?$image=1800Contacts/000732_demandware&fmt=png-alpha&wid=500&hei=278&op_sharpen=1"
+				}]
+			},
+			width: 0,
+			index: 0,
+			setLength: 1
+		}
+	},
+	render(){
+		var slide = this;
+		var slideOptions = {
+			style: {
+				width: slide.props.width + 'px'
+			},
+			onTouchStart: slide.props.touchStart,
+			onTouchMove: slide.props.touchMove
+		};
+		return (
+			<li {...slideOptions}>
+				<a onSelect={slide.props.onSelect}> <img src={slide.props.data.images[0].smallUrl}/>
+					<span>{slide.props.data.name}</span> </a>
+			</li>
+		);
+	}
+});
+
+var slideTypeMap = {
+	product: ProductSlide,
+	hero: HeroSlide
+};
+
 var SlideSelect = React.createClass({
 	getDefaultProps(){
 		return {
+			type: 'product',
+			items: [],
 			showDots: false,
-			showArrows: true
+			showArrows: true,
+			productSizes: [
+				{visibleProducts: 2.5, size: 0},
+				{visibleProducts: 3.5, size: 470},
+				{visibleProducts: 3.75, size: 630},
+				{visibleProducts: 4.5, size: 710},
+				{visibleProducts: 5.5, size: 950},
+				{visibleProducts: 6.5, size: 1010}
+			],
+			fullWidth: false,
+			onSelect: (data) => {
+				alert(
+					`It is intended that you will provide your own method in the onSelect prop for the
+					SlideSelect component, but here's what your function would receive on select:
+					${JSON.stringify(data, null, '\t')}`
+				);
+			}
 		};
 	},
 	getInitialState(){
@@ -100,6 +186,18 @@ var SlideSelect = React.createClass({
 			x: this.state.width * index
 		});
 	},
+	prevNext(direction){
+		var slider = this;
+		var index = slider.state.targetIndex + direction % slider.props.items.length;
+		if (index < 0) {
+			index = slider.props.items.length - index;
+		}
+		this.setState({
+			momentum: 0,
+			targetIndex: index,
+			x: slider.state.width * index
+		});
+	},
 	startMomentum(syntheticTouchStartEvent){
 		console.log(syntheticTouchStartEvent);
 		var slider = this;
@@ -119,35 +217,61 @@ var SlideSelect = React.createClass({
 				momentum: momentum,
 				x: slider.state.x += momentum
 			});
-			if(momentum !== 0){
+			if (momentum !== 0) {
 				requestAnimationFrame(tick);
 			}
 		};
 		requestAnimationFrame(tick);
 	},
+	getProductWidthRatio(){
+		var slider = this;
+		var result = 1;
+		if (slider.props.fullWidth === false) {
+			var widthList = slider.props.productSizes.slice();
+			var breakpoint;
+			while (widthList.length) {
+				breakpoint = widthList.pop();
+				if (breakpoint.size < slider.state.width) {
+					break;
+				}
+			}
+			console.log(slider.state.width, breakpoint.size);
+			result = 1 / breakpoint.visibleProducts;
+		}
+		return result;
+	},
 	getSlides(){
 		var slider = this;
 		var slideList = [];
+		var widthRatio = slider.getProductWidthRatio();
+		var slideWidth = Math.floor(slider.state.width * widthRatio);
 		var sliderProps = {
 			className: 'slideList',
 			style: {
 				left: -slider.state.x + 'px',
-				width: (slider.props.items.length * slider.state.width) + 'px'
+				width: (slideWidth * slider.props.items.length) + 'px'
 			},
 			onTouchStart: slider.startMomentum,
 			onTouchMove: slider.addMomentum
 		};
-		slider.props.items.forEach(function(item, index) {
+		var setLength = slider.props.items.length;
+		var onSelect = (something) => {
+			slider.props.onSelect(something);
+		};
+		slider.props.items.forEach((item, index) => {
 			var slideProps = {
 				key: 'slide-' + index,
-				slideName: item,
-				color: `hsl(${Math.round((index / slider.props.items.length) * 360)}, 100%, 50%)`,
-				width: slider.state.width,
+				data: item,
+				index: index,
+				setLength: setLength,
+				width: slideWidth,
+				onSelect: onSelect,
 				touchStart: slider.startMomentum,
 				touchMove: slider.addMomentum
 			};
+			var SlideType = slideTypeMap[this.props.type];
 			slideList.push(
-				<Slide {...slideProps} />
+				<SlideType {...slideProps} />
 			);
 		});
 		return (
@@ -164,7 +288,7 @@ var SlideSelect = React.createClass({
 			var changeIndex = function(index) {
 				slider.changeIndex(index);
 			};
-			slider.props.items.forEach(function(item, index) {
+			slider.props.items.forEach((item, index) => {
 				var dotProps = {
 					key: 'dot-' + index,
 					changeIndex: changeIndex,
@@ -184,14 +308,27 @@ var SlideSelect = React.createClass({
 		}
 		return result;
 	},
+	getArrows(){
+		var slider = this;
+		var arrows = [];
+		if (slider.props.showArrows) {
+			var prevActive = slider.state.targetIndex !== 0;
+			var nextActive = slider.state.targetIndex !== slider.props.items.length - 1;
+			arrows.push(<Arrow key="prev" direction={-1} active={prevActive} prevNext={slider.prevNext}/>);
+			arrows.push(<Arrow key="next" direction={ 1} active={nextActive} prevNext={slider.prevNext}/>);
+		}
+		return arrows;
+	},
 	render(){
 		var slider = this;
+		var className = `SlideSelect ${slider.props.type}`;
 		var slides = slider.getSlides();
 		var dots = slider.getDots();
+		var arrows = slider.getArrows();
 		return (
 			<div className="SlideSelectHolder" ref="holder">
-				<div className="SlideSelect">
-					{slides}					{dots}
+				<div className={className}>
+					{slides}{dots}{arrows}
 				</div>
 			</div>
 		);

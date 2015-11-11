@@ -1,11 +1,14 @@
-var heroList = ['Grumpy Cat', 'Hover Cat', 'Bread Cat', 'Business Cat'];
+var heroList = ['Grumpy Cat', 'Hover Cat', 'Bread Cat', 'Business Cat', 'Hipster Cat', 'Lime Cat', 'Mellow Cat'];
+
 ReactDOM.render(
 	React.createElement(
 		SlideSelect,
 		{
-			type: 'HeroSlide',
+			type: 'hero',
 			items: heroList,
-			showDots: true
+			showDots: true,
+			showArrows: true,
+			fullWidth: true
 		}
 	),
 	document.getElementById('example-hero')

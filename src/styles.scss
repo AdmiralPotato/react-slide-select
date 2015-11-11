@@ -1,10 +1,11 @@
 .SlideSelect {
+	box-sizing: border-box;
 	position: relative;
 	display: block;
 	overflow: hidden;
-	height: 12rem;
 	text-align: center;
 	* {
+		box-sizing: border-box;
 		margin: 0;
 		padding: 0;
 		display: block;
@@ -12,13 +13,11 @@
 	> ul {
 		&.slideList {
 			position: absolute;
-			font-size: 0;
+			overflow: hidden;
 			> li {
-				display: inline-block;
-				font-size: 2rem;
-				width: 100%;
-				height: 12rem;
-				line-height: 12rem;
+				display: block;
+				float: left;
+				font-size: 1.5rem;
 			}
 		}
 		&.dotList {
@@ -50,6 +49,86 @@
 				}
 				&.active > a:before {
 					color: #000;
+				}
+			}
+		}
+	}
+	.arrow {
+		position: absolute;
+		display: block;
+		height: 100%;
+		&.prev {
+			left: 0;
+			> a:before {
+				content: '<';
+			}
+		}
+		&.next {
+			right: 0;
+			> a:before {
+				content: '>';
+			}
+		}
+		> a {
+			display: block;
+			height: 100%;
+			width: 8rem;
+			color: rgba(0, 0, 0, 0.125);
+			text-decoration: none;
+			cursor: default;
+			&:before {
+				position: absolute;
+				display: block;
+				line-height: 0;
+				top: 50%;
+				font-size: 8rem;
+				width: 8rem;
+			}
+			> span {
+				display: none;
+			}
+		}
+		&.active > a {
+			cursor: pointer;
+			color: rgba(0, 0, 0, 0.55);
+			&:hover {
+				color: #000;
+			}
+		}
+	}
+
+	&.product {
+		height: 180px;
+		> ul.slideList {
+			> li {
+				padding: 0 0.25rem;
+				> a {
+					display: block;
+					cursor: pointer;
+					img {
+						width: 100%;
+					}
+					span {
+						display: block;
+						padding: 0.25rem 0;
+					}
+				}
+			}
+		}
+		@media screen and (min-width: 480px) {
+			> ul.slideList > li > a {
+				height: 220px;
+			}
+		}
+	}
+
+	&.hero {
+		height: 36rem;
+		> ul {
+			&.slideList {
+				> li {
+					height: 36rem;
+					line-height: 36rem;
 				}
 			}
 		}

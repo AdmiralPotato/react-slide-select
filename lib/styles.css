@@ -1,22 +1,21 @@
 .SlideSelect {
+  box-sizing: border-box;
   position: relative;
   display: block;
   overflow: hidden;
-  height: 12rem;
   text-align: center; }
   .SlideSelect * {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
     display: block; }
   .SlideSelect > ul.slideList {
     position: absolute;
-    font-size: 0; }
+    overflow: hidden; }
     .SlideSelect > ul.slideList > li {
-      display: inline-block;
-      font-size: 2rem;
-      width: 100%;
-      height: 12rem;
-      line-height: 12rem; }
+      display: block;
+      float: left;
+      font-size: 1.5rem; }
   .SlideSelect > ul.dotList {
     position: absolute;
     bottom: 0;
@@ -42,3 +41,56 @@
           color: #ccc; }
       .SlideSelect > ul.dotList > li.active > a:before {
         color: #000; }
+  .SlideSelect .arrow {
+    position: absolute;
+    display: block;
+    height: 100%; }
+    .SlideSelect .arrow.prev {
+      left: 0; }
+      .SlideSelect .arrow.prev > a:before {
+        content: '<'; }
+    .SlideSelect .arrow.next {
+      right: 0; }
+      .SlideSelect .arrow.next > a:before {
+        content: '>'; }
+    .SlideSelect .arrow > a {
+      display: block;
+      height: 100%;
+      width: 8rem;
+      color: rgba(0, 0, 0, 0.125);
+      text-decoration: none;
+      cursor: default; }
+      .SlideSelect .arrow > a:before {
+        position: absolute;
+        display: block;
+        line-height: 0;
+        top: 50%;
+        font-size: 8rem;
+        width: 8rem; }
+      .SlideSelect .arrow > a > span {
+        display: none; }
+    .SlideSelect .arrow.active > a {
+      cursor: pointer;
+      color: rgba(0, 0, 0, 0.55); }
+      .SlideSelect .arrow.active > a:hover {
+        color: #000; }
+  .SlideSelect.product {
+    height: 180px; }
+    .SlideSelect.product > ul.slideList > li {
+      padding: 0 0.25rem; }
+      .SlideSelect.product > ul.slideList > li > a {
+        display: block;
+        cursor: pointer; }
+        .SlideSelect.product > ul.slideList > li > a img {
+          width: 100%; }
+        .SlideSelect.product > ul.slideList > li > a span {
+          display: block;
+          padding: 0.25rem 0; }
+    @media screen and (min-width: 480px) {
+      .SlideSelect.product > ul.slideList > li > a {
+        height: 220px; } }
+  .SlideSelect.hero {
+    height: 36rem; }
+    .SlideSelect.hero > ul.slideList > li {
+      height: 36rem;
+      line-height: 36rem; }
