@@ -295,7 +295,7 @@ var SlideSelect = React.createClass({
 		var slider = this;
 		var slideSelectProps = {
 			ref: 'slider',
-			className: `SlideSelect nativeScroll ${slider.props.type}`
+			className: `SlideSelect ${window['ontouchstart'] ? '' : 'nativeScroll'} ${slider.props.type}`
 		};
 		var slides = slider.getSlides();
 		var dots = slider.getDots();
