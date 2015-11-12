@@ -4,7 +4,6 @@
   "description": "",
   "main": "lib/react-slide-select.js",
   "scripts": {
-    "postinstall": "npm run build",
     "build": "babel ./src --out-dir ./lib --presets react,es2015 --source-maps && node-sass ./src -o ./lib"
   },
   "author": "Admiral Potato, Mike Easley",
