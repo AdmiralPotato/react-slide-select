@@ -43,7 +43,8 @@ var Dot = React.createClass({
 		var className = this.props.active ? 'active' : '';
 		return (
 			<li className={className}>
-				<a onMouseDown={dot.click} onTouchStart={dot.click} title={dot.props.slideName}><span>{dot.props.index}</span></a>
+				<a onMouseDown={dot.click} onTouchStart={dot.click}
+				   title={dot.props.slideName}><span>{dot.props.index}</span></a>
 			</li>
 		);
 	}
@@ -192,31 +193,34 @@ var SlideSelect = React.createClass({
 			});
 		}
 	},
-	createTransition(targetValues, duration){
+	createTransition(targetValues, duration, interpolationMethod){
 		var slider = this;
 		var startValues = {};
 		var propertyName, startTime;
+		interpolationMethod = interpolationMethod || ((k) => {
+				return k
+			});
 		var animationCallback = (time) => {
 			startTime = startTime === undefined ? time : startTime;
 			var currentValues = {};
 			var timeDiff = time - startTime;
-			var progressFraction = Math.min(1, Math.max(0, timeDiff / duration));
+			var progressFraction = interpolationMethod(Math.min(1, Math.max(0, timeDiff / duration)));
 			var propertyName;
 			var propertyDiff;
-			if(progressFraction !== 1){
+			if (progressFraction !== 1) {
 				requestAnimationFrame(animationCallback);
 			}
-			for(propertyName in targetValues){
-				if(targetValues.hasOwnProperty(propertyName)){
+			for (propertyName in targetValues) {
+				if (targetValues.hasOwnProperty(propertyName)) {
 					propertyDiff = targetValues[propertyName] - startValues[propertyName];
 					currentValues[propertyName] = startValues[propertyName] + (propertyDiff * progressFraction);
 				}
 			}
 			slider.setState(currentValues);
 		};
-		for(propertyName in targetValues){
-			if(targetValues.hasOwnProperty(propertyName)){
-				if(slider.state.hasOwnProperty(propertyName)){
+		for (propertyName in targetValues) {
+			if (targetValues.hasOwnProperty(propertyName)) {
+				if (slider.state.hasOwnProperty(propertyName)) {
 					startValues[propertyName] = slider.state[propertyName];
 				} else {
 					throw new Error(`Invalid property ${propertyName} - property does not exist on state object.`);
@@ -234,7 +238,11 @@ var SlideSelect = React.createClass({
 			{
 				x: this.state.width * index * slider.getProductWidthRatio()
 			},
-			1000
+			1000,
+			(k) => {
+				//reference: Circular.Out; https://github.com/tweenjs/tween.js/blob/master/src/Tween.js
+				return Math.sqrt(1 - (--k * k));
+			}
 		);
 	},
 	prevNext(direction){
@@ -339,7 +347,14 @@ var SlideSelect = React.createClass({
 		var slider = this;
 		var slideSelectProps = {
 			ref: 'slider',
-			className: `SlideSelect ${slider.state.supportsTouch ? 'nativeScroll ' : ''}${slider.props.type}`
+			className: `SlideSelect ${slider.state.supportsTouch ? 'nativeScroll ' : ''}${slider.props.type}`,
+			onScroll: function(syntheticScrollEvent) {
+				var x = syntheticScrollEvent.nativeEvent.target.scrollLeft;
+				slider.setState({
+					x: x,
+					targetIndex: Math.round(x / slider.state.width / slider.getProductWidthRatio())
+				});
+			}
 		};
 		var slides = slider.getSlides();
 		var dots = slider.getDots();
