@@ -153,7 +153,9 @@ var SlideSelect = React.createClass({
 		return {
 			x: 0,
 			momentum: 0,
-			width: 0,
+			holderWidth: 0,
+			slideWidth: 0,
+			contentWidth: 0,
 			needsResizeUpdate: true,
 			targetIndex: 0,
 			touchStartX: 0,
@@ -180,13 +182,18 @@ var SlideSelect = React.createClass({
 		});
 	},
 	updateDimensions(){
+		var slider = this;
 		//reference: http://stackoverflow.com/questions/19014250/reactjs-rerender-on-browser-resize
-		if (this.state.needsResizeUpdate) {
-			var holder = ReactDOM.findDOMNode(this.refs['holder']);
-			var width = holder ? holder.clientWidth : 0;
+		if (slider.state.needsResizeUpdate) {
+			var holder = ReactDOM.findDOMNode(slider.refs['holder']);
+			var holderWidth = holder ? holder.clientWidth : 0;
+			var slideWidthRatio = slider.getSlideWidthRatio();
+			var slideWidth = Math.floor(holderWidth * slideWidthRatio);
 			this.setState({
-				width: width,
-				x: width * this.state.targetIndex,
+				holderWidth: holderWidth,
+				x: slideWidth * slider.state.targetIndex,
+				slideWidth: slideWidth,
+				contentWidth: slideWidth * slider.props.items.length,
 				needsResizeUpdate: false,
 				//We tried feature detection.
 				//Even Modernizr's approach didn't work in all important cases. This is comprehensive _enough_.
@@ -243,7 +250,7 @@ var SlideSelect = React.createClass({
 		});
 		slider.createTransition({
 			targetValues: {
-				x: this.state.width * index * slider.getProductWidthRatio()
+				x: this.state.slideWidth * index
 			},
 			interpolationMethod: (k) => {
 				//reference: Circular.Out; https://github.com/tweenjs/tween.js/blob/master/src/Tween.js
@@ -264,7 +271,7 @@ var SlideSelect = React.createClass({
 		}
 		slider.changeIndex(index);
 	},
-	getProductWidthRatio(){
+	getSlideWidthRatio(){
 		var slider = this;
 		var result = 1;
 		if (slider.props.fullWidth === false) {
@@ -272,7 +279,7 @@ var SlideSelect = React.createClass({
 			var breakpoint;
 			while (widthList.length) {
 				breakpoint = widthList.pop();
-				if (breakpoint.size < slider.state.width) {
+				if (breakpoint.size < slider.state.holderWidth) {
 					break;
 				}
 			}
@@ -283,15 +290,12 @@ var SlideSelect = React.createClass({
 	getSlides(){
 		var slider = this;
 		var slideList = [];
-		var widthRatio = slider.getProductWidthRatio();
-		var slideWidth = Math.floor(slider.state.width * widthRatio);
 		var sliderProps = {
 			className: 'slideList',
 			style: {
-				width: (slideWidth * slider.props.items.length) + 'px'
+				width: slider.state.contentWidth + 'px'
 			}
 		};
-		var setLength = slider.props.items.length;
 		var onSelect = (something) => {
 			slider.props.onSelect(something);
 		};
@@ -300,8 +304,8 @@ var SlideSelect = React.createClass({
 				key: 'slide-' + index,
 				data: item,
 				index: index,
-				setLength: setLength,
-				width: slideWidth,
+				setLength: slider.props.items.length,
+				width: slider.state.slideWidth,
 				onSelect: onSelect
 			};
 			var SlideType = slideTypeMap[this.props.type];
@@ -357,13 +361,16 @@ var SlideSelect = React.createClass({
 	handleScroll(syntheticScrollEvent) {
 		var slider = this;
 		var x = syntheticScrollEvent.nativeEvent.target.scrollLeft;
-		var newState = {
-			x: x
-		};
-		if(!slider.state.suppressIndexScrollUpdate){
-			newState.targetIndex = Math.round(x / slider.state.width / slider.getProductWidthRatio())
+		//don't allow scroll bounce to set state
+		if(x >= 0 && x <= slider.state.contentWidth - slider.state.holderWidth){
+			var newState = {
+				x: x
+			};
+			if(!slider.state.suppressIndexScrollUpdate){
+				newState.targetIndex = Math.round(x / slider.state.slideWidth);
+			}
+			slider.setState(newState);
 		}
-		slider.setState(newState);
 	},
 	render(){
 		var slider = this;
