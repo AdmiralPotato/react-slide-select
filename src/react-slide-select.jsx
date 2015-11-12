@@ -265,7 +265,8 @@ var SlideSelect = React.createClass({
 	},
 	prevNext(direction){
 		var slider = this;
-		var index = slider.state.targetIndex + direction % slider.props.items.length;
+		var howManyProductsFitOnScreenCompletely = Math.floor(slider.state.holderWidth / slider.state.slideWidth);
+		var index = slider.state.targetIndex + (direction * howManyProductsFitOnScreenCompletely) % slider.props.items.length;
 		if (index < 0) {
 			index = slider.props.items.length - index;
 		}
@@ -350,7 +351,7 @@ var SlideSelect = React.createClass({
 	getArrows(){
 		var slider = this;
 		var arrows = [];
-		if (slider.props.showArrows) {
+		if (slider.props.showArrows && slider.state.contentWidth > slider.state.holderWidth) {
 			var prevActive = slider.state.targetIndex !== 0;
 			var nextActive = slider.state.targetIndex !== slider.props.items.length - 1;
 			arrows.push(<Arrow key="prev" direction={-1} active={prevActive} prevNext={slider.prevNext}/>);
