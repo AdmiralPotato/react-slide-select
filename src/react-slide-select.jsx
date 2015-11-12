@@ -187,7 +187,7 @@ var SlideSelect = React.createClass({
 		if (slider.state.needsResizeUpdate) {
 			var holder = ReactDOM.findDOMNode(slider.refs['holder']);
 			var holderWidth = holder ? holder.clientWidth : 0;
-			var slideWidthRatio = slider.getSlideWidthRatio();
+			var slideWidthRatio = slider.getSlideWidthRatio(holderWidth);
 			var slideWidth = Math.floor(holderWidth * slideWidthRatio);
 			this.setState({
 				holderWidth: holderWidth,
@@ -271,7 +271,7 @@ var SlideSelect = React.createClass({
 		}
 		slider.changeIndex(index);
 	},
-	getSlideWidthRatio(){
+	getSlideWidthRatio(holderWidth){
 		var slider = this;
 		var result = 1;
 		if (slider.props.fullWidth === false) {
@@ -279,7 +279,7 @@ var SlideSelect = React.createClass({
 			var breakpoint;
 			while (widthList.length) {
 				breakpoint = widthList.pop();
-				if (breakpoint.size < slider.state.holderWidth) {
+				if (breakpoint.size < holderWidth) {
 					break;
 				}
 			}
