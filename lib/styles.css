@@ -43,8 +43,7 @@
       overflow-scrolling: touch;
       -webkit-overflow-scrolling: touch; }
   .SlideSelectHolder ul.dotList {
-    position: absolute;
-    bottom: 0;
+    background-color: #999;
     display: block;
     font-size: 0;
     width: 100%;

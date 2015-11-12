@@ -160,7 +160,8 @@ var SlideSelect = React.createClass({
 			targetIndex: 0,
 			touchStartX: 0,
 			supportsTouch: false,
-			suppressIndexUpdate: false
+			suppressIndexUpdate: false,
+			howManySlidesFitOnScreenCompletely: 0
 		};
 	},
 	componentDidUpdate(){
@@ -189,12 +190,15 @@ var SlideSelect = React.createClass({
 			var holderWidth = holder ? holder.clientWidth : 0;
 			var slideWidthRatio = slider.getSlideWidthRatio(holderWidth);
 			var slideWidth = Math.floor(holderWidth * slideWidthRatio);
+			var numSlides = slider.props.items.length;
+			var howManySlidesFitOnScreenCompletely = Math.floor(holderWidth / slideWidth)
 			this.setState({
 				holderWidth: holderWidth,
 				x: slideWidth * slider.state.targetIndex,
 				slideWidth: slideWidth,
-				contentWidth: slideWidth * slider.props.items.length,
+				contentWidth: slideWidth * numSlides,
 				needsResizeUpdate: false,
+				howManySlidesFitOnScreenCompletely: howManySlidesFitOnScreenCompletely,
 				//We tried feature detection.
 				//Even Modernizr's approach didn't work in all important cases. This is comprehensive _enough_.
 				supportsTouch: navigator.userAgent.indexOf('Mobile') !== -1
@@ -265,11 +269,10 @@ var SlideSelect = React.createClass({
 	},
 	prevNext(direction){
 		var slider = this;
-		var howManyProductsFitOnScreenCompletely = Math.floor(slider.state.holderWidth / slider.state.slideWidth);
-		var index = slider.state.targetIndex + (direction * howManyProductsFitOnScreenCompletely) % slider.props.items.length;
-		if (index < 0) {
-			index = slider.props.items.length - index;
-		}
+		var numItems = slider.props.items.length;
+		var index = Math.max(0, Math.min(numItems -1,
+			slider.state.targetIndex + direction * slider.state.howManySlidesFitOnScreenCompletely
+		));
 		slider.changeIndex(index);
 	},
 	getSlideWidthRatio(holderWidth){
@@ -362,13 +365,15 @@ var SlideSelect = React.createClass({
 	handleScroll(syntheticScrollEvent) {
 		var slider = this;
 		var x = syntheticScrollEvent.nativeEvent.target.scrollLeft;
+		var maximumScrollPosition = slider.state.contentWidth - slider.state.holderWidth;
+		var scrollCompletionRatio = x / maximumScrollPosition;
 		//don't allow scroll bounce to set state
-		if(x >= 0 && x <= slider.state.contentWidth - slider.state.holderWidth){
+		if(x >= 0 && x <= maximumScrollPosition){
 			var newState = {
 				x: x
 			};
 			if(!slider.state.suppressIndexScrollUpdate){
-				newState.targetIndex = Math.round(x / slider.state.slideWidth);
+				newState.targetIndex = Math.round(scrollCompletionRatio * (slider.props.items.length -1));
 			}
 			slider.setState(newState);
 		}
