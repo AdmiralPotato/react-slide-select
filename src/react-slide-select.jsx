@@ -157,7 +157,8 @@ var SlideSelect = React.createClass({
 			needsResizeUpdate: true,
 			targetIndex: 0,
 			touchStartX: 0,
-			supportsTouch: false
+			supportsTouch: false,
+			suppressIndexUpdate: false
 		};
 	},
 	componentDidUpdate(){
@@ -193,13 +194,16 @@ var SlideSelect = React.createClass({
 			});
 		}
 	},
-	createTransition(targetValues, duration, interpolationMethod){
+	createTransition(args){
+		var targetValues = args.targetValues;
+		var duration = args.duration || 1000;
+		var interpolationMethod = args.interpolationMethod || ((k) => {
+				return k
+			});
+		var callback = args.callback || (() => {});
 		var slider = this;
 		var startValues = {};
 		var propertyName, startTime;
-		interpolationMethod = interpolationMethod || ((k) => {
-				return k
-			});
 		var animationCallback = (time) => {
 			startTime = startTime === undefined ? time : startTime;
 			var currentValues = {};
@@ -209,6 +213,8 @@ var SlideSelect = React.createClass({
 			var propertyDiff;
 			if (progressFraction !== 1) {
 				requestAnimationFrame(animationCallback);
+			} else {
+				requestAnimationFrame(callback);
 			}
 			for (propertyName in targetValues) {
 				if (targetValues.hasOwnProperty(propertyName)) {
@@ -232,18 +238,23 @@ var SlideSelect = React.createClass({
 	changeIndex(index){
 		var slider = this;
 		slider.setState({
-			targetIndex: index
+			targetIndex: index,
+			suppressIndexScrollUpdate: true
 		});
-		slider.createTransition(
-			{
+		slider.createTransition({
+			targetValues: {
 				x: this.state.width * index * slider.getProductWidthRatio()
 			},
-			1000,
-			(k) => {
+			interpolationMethod: (k) => {
 				//reference: Circular.Out; https://github.com/tweenjs/tween.js/blob/master/src/Tween.js
 				return Math.sqrt(1 - (--k * k));
+			},
+			callback: () => {
+				slider.setState({
+					suppressIndexScrollUpdate: false
+				});
 			}
-		);
+		});
 	},
 	prevNext(direction){
 		var slider = this;
@@ -343,18 +354,23 @@ var SlideSelect = React.createClass({
 		}
 		return arrows;
 	},
+	handleScroll(syntheticScrollEvent) {
+		var slider = this;
+		var x = syntheticScrollEvent.nativeEvent.target.scrollLeft;
+		var newState = {
+			x: x
+		};
+		if(!slider.state.suppressIndexScrollUpdate){
+			newState.targetIndex = Math.round(x / slider.state.width / slider.getProductWidthRatio())
+		}
+		slider.setState(newState);
+	},
 	render(){
 		var slider = this;
 		var slideSelectProps = {
 			ref: 'slider',
 			className: `SlideSelect ${slider.state.supportsTouch ? 'nativeScroll ' : ''}${slider.props.type}`,
-			onScroll: function(syntheticScrollEvent) {
-				var x = syntheticScrollEvent.nativeEvent.target.scrollLeft;
-				slider.setState({
-					x: x,
-					targetIndex: Math.round(x / slider.state.width / slider.getProductWidthRatio())
-				});
-			}
+			onScroll: slider.handleScroll
 		};
 		var slides = slider.getSlides();
 		var dots = slider.getDots();
