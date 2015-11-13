@@ -1,3 +1,6 @@
+var React = require('react');
+var ReactDOM = require('react-dom');
+
 var Arrow = React.createClass({
 	getDefaultProps(){
 		return {
@@ -43,8 +46,7 @@ var Dot = React.createClass({
 		var className = this.props.active ? 'active' : '';
 		return (
 			<li className={className}>
-				<a onMouseDown={dot.click} onTouchStart={dot.click}
-				   title={dot.props.slideName}><span>{dot.props.index}</span></a>
+				<a onMouseDown={dot.click} onTouchStart={dot.click} title={dot.props.slideName}><span>{dot.props.index}</span></a>
 			</li>
 		);
 	}
@@ -211,7 +213,8 @@ var SlideSelect = React.createClass({
 		var interpolationMethod = args.interpolationMethod || ((k) => {
 				return k
 			});
-		var callback = args.callback || (() => {});
+		var callback = args.callback || (() => {
+			});
 		var slider = this;
 		var startValues = {};
 		var propertyName, startTime;
@@ -270,7 +273,7 @@ var SlideSelect = React.createClass({
 	prevNext(direction){
 		var slider = this;
 		var numItems = slider.props.items.length;
-		var index = Math.max(0, Math.min(numItems -1,
+		var index = Math.max(0, Math.min(numItems - 1,
 			slider.state.targetIndex + direction * slider.state.howManySlidesFitOnScreenCompletely
 		));
 		slider.changeIndex(index);
@@ -368,12 +371,12 @@ var SlideSelect = React.createClass({
 		var maximumScrollPosition = slider.state.contentWidth - slider.state.holderWidth;
 		var scrollCompletionRatio = x / maximumScrollPosition;
 		//don't allow scroll bounce to set state
-		if(x >= 0 && x <= maximumScrollPosition){
+		if (x >= 0 && x <= maximumScrollPosition) {
 			var newState = {
 				x: x
 			};
-			if(!slider.state.suppressIndexScrollUpdate){
-				newState.targetIndex = Math.round(scrollCompletionRatio * (slider.props.items.length -1));
+			if (!slider.state.suppressIndexScrollUpdate) {
+				newState.targetIndex = Math.round(scrollCompletionRatio * (slider.props.items.length - 1));
 			}
 			slider.setState(newState);
 		}
@@ -398,3 +401,5 @@ var SlideSelect = React.createClass({
 		);
 	}
 });
+
+module.exports = SlideSelect;
