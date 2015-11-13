@@ -1,3 +1,10 @@
+@mixin transition ($speed: 250ms) {
+	$properties: all $speed;
+	-webkit-transition: $properties;
+	-moz-transition: $properties;
+	-ms-transition: $properties;
+	transition: $properties;
+}
 .SlideSelectHolder {
 	position: relative;
 	box-sizing: border-box;
@@ -87,6 +94,7 @@
 					display: none;
 				}
 				&:before {
+					@include transition;
 					display: block;
 					content: '\2022';
 					font-size: 5rem;
@@ -107,51 +115,62 @@
 		top: 25%;
 		display: block;
 		height: 50%;
+		$borderRadius: 0.5rem;
+
 		&.prev {
 			left: 0;
 			> a {
-				border-radius: 0 2em 2em 0;
+				border-radius: 0 $borderRadius $borderRadius 0;
 				border-left: none;
-				&:before {
-					content: '<';
-				}
 			}
 		}
 		&.next {
 			right: 0;
 			> a {
-				border-radius: 2em 0 0 2em;
+				border-radius: $borderRadius 0 0 $borderRadius;
 				border-right: none;
-				&:before {
-					content: '>';
-				}
 			}
 		}
 		> a {
+			@include transition;
+			opacity: 0.25;
+			background-color: #fff;
+			position: relative;
 			display: block;
 			height: 100%;
-			width: 8rem;
+			width: 4rem;
 			color: rgba(0, 0, 0, 0.125);
 			text-decoration: none;
 			cursor: default;
-			border: 0.25em solid #369;
-			&:before {
+			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+			> svg {
 				position: absolute;
 				display: block;
-				line-height: 0;
-				top: 50%;
-				font-size: 8rem;
-				width: 8rem;
-			}
-			> span {
-				display: none;
+				top: 0;
+				bottom: 0;
+				left: 0;
+				right: 0;
+				margin: auto;
+				polyline {
+					@include transition;
+					fill: none;
+					stroke: #ccc;
+					stroke-width: 4px;
+					stroke-linecap: round;
+					stroke-linejoin: round;
+					stroke-miterlimit: 10;
+				}
 			}
 		}
 		&.active > a {
+			opacity: 0.75;
 			cursor: pointer;
 			color: rgba(0, 0, 0, 0.55);
 			&:hover {
-				color: #000;
+				opacity: 1;
+				svg polyline {
+					stroke: #666;
+				}
 			}
 		}
 	}

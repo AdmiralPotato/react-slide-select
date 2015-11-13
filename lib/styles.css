@@ -59,6 +59,10 @@
         .SlideSelectHolder ul.dotList > li > a > span {
           display: none; }
         .SlideSelectHolder ul.dotList > li > a:before {
+          -webkit-transition: all 250ms;
+          -moz-transition: all 250ms;
+          -ms-transition: all 250ms;
+          transition: all 250ms;
           display: block;
           content: '\2022';
           font-size: 5rem;
@@ -76,36 +80,52 @@
     .SlideSelectHolder .arrow.prev {
       left: 0; }
       .SlideSelectHolder .arrow.prev > a {
-        border-radius: 0 2em 2em 0;
+        border-radius: 0 0.5rem 0.5rem 0;
         border-left: none; }
-        .SlideSelectHolder .arrow.prev > a:before {
-          content: '<'; }
     .SlideSelectHolder .arrow.next {
       right: 0; }
       .SlideSelectHolder .arrow.next > a {
-        border-radius: 2em 0 0 2em;
+        border-radius: 0.5rem 0 0 0.5rem;
         border-right: none; }
-        .SlideSelectHolder .arrow.next > a:before {
-          content: '>'; }
     .SlideSelectHolder .arrow > a {
+      -webkit-transition: all 250ms;
+      -moz-transition: all 250ms;
+      -ms-transition: all 250ms;
+      transition: all 250ms;
+      opacity: 0.25;
+      background-color: #fff;
+      position: relative;
       display: block;
       height: 100%;
-      width: 8rem;
+      width: 4rem;
       color: rgba(0, 0, 0, 0.125);
       text-decoration: none;
       cursor: default;
-      border: 0.25em solid #369; }
-      .SlideSelectHolder .arrow > a:before {
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25); }
+      .SlideSelectHolder .arrow > a > svg {
         position: absolute;
         display: block;
-        line-height: 0;
-        top: 50%;
-        font-size: 8rem;
-        width: 8rem; }
-      .SlideSelectHolder .arrow > a > span {
-        display: none; }
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: auto; }
+        .SlideSelectHolder .arrow > a > svg polyline {
+          -webkit-transition: all 250ms;
+          -moz-transition: all 250ms;
+          -ms-transition: all 250ms;
+          transition: all 250ms;
+          fill: none;
+          stroke: #ccc;
+          stroke-width: 4px;
+          stroke-linecap: round;
+          stroke-linejoin: round;
+          stroke-miterlimit: 10; }
     .SlideSelectHolder .arrow.active > a {
+      opacity: 0.75;
       cursor: pointer;
       color: rgba(0, 0, 0, 0.55); }
       .SlideSelectHolder .arrow.active > a:hover {
-        color: #000; }
+        opacity: 1; }
+        .SlideSelectHolder .arrow.active > a:hover svg polyline {
+          stroke: #666; }

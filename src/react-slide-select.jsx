@@ -19,11 +19,17 @@ var Arrow = React.createClass({
 	},
 	render() {
 		var arrow = this;
-		var className = 'arrow ' + (this.props.direction === 1 ? 'next' : 'prev') + (arrow.props.active ? ' active' : '');
-		var content = (this.props.direction === 1 ? '>' : '<');
+		var className = 'arrow ' + (arrow.props.direction === 1 ? 'next' : 'prev') + (arrow.props.active ? ' active' : '');
+		var angle = `rotate(${arrow.props.direction === 1 ? 0 : 180})`;
 		return (
 			<div className={className}>
-				<a onMouseDown={arrow.click} onTouchStart={arrow.click}><span>{content}</span></a>
+				<a onMouseDown={arrow.click} onTouchStart={arrow.click}>
+					<svg height="32" width="32" viewBox="-16 -16 32 32" preserveAspectRatio="none">
+						<g transform={angle}>
+							<polyline points="-4,-12 8,0 -4,12 "/>
+						</g>
+					</svg>
+				</a>
 			</div>
 		);
 	}
@@ -193,7 +199,7 @@ var SlideSelect = React.createClass({
 			var slideWidthRatio = slider.getSlideWidthRatio(holderWidth);
 			var slideWidth = Math.floor(holderWidth * slideWidthRatio);
 			var numSlides = slider.props.items.length;
-			var howManySlidesFitOnScreenCompletely = Math.floor(holderWidth / slideWidth)
+			var howManySlidesFitOnScreenCompletely = Math.floor(holderWidth / slideWidth);
 			this.setState({
 				holderWidth: holderWidth,
 				x: slideWidth * slider.state.targetIndex,

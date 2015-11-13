@@ -6,7 +6,7 @@ ReactDOM.render(
 		{
 			type: 'product',
 			items: productList,
-			showDots: true,
+			showDots: false,
 			showArrows: true
 		}
 	),
