@@ -50,9 +50,14 @@ var Dot = React.createClass({
 	render(){
 		var dot = this;
 		var className = this.props.active ? 'active' : '';
+		var dotProps = {
+			onMouseDown: dot.click,
+			onTouchStart: dot.click,
+			title: dot.props.slideName
+		};
 		return (
 			<li className={className}>
-				<a onMouseDown={dot.click} onTouchStart={dot.click} title={dot.props.slideName}><span>{dot.props.index}</span></a>
+				<a {...dotProps}><span>{dot.props.index}</span></a>
 			</li>
 		);
 	}
@@ -140,12 +145,12 @@ var SlideSelect = React.createClass({
 			showDots: false,
 			showArrows: true,
 			productSizes: [
-				{visibleProducts: 2.5, size: 0},
-				{visibleProducts: 3.5, size: 470},
-				{visibleProducts: 3.75, size: 630},
-				{visibleProducts: 4.5, size: 710},
-				{visibleProducts: 5.5, size: 950},
-				{visibleProducts: 6.5, size: 1010}
+				{showArrows: 0, visibleProducts: 2.5, size: 0},
+				{showArrows: 0, visibleProducts: 3.5, size: 470},
+				{showArrows: 1, visibleProducts: 3.75, size: 630},
+				{showArrows: 1, visibleProducts: 4.5, size: 710},
+				{showArrows: 1, visibleProducts: 5.5, size: 950},
+				{showArrows: 1, visibleProducts: 6.5, size: 1010}
 			],
 			fullWidth: false,
 			onSelect: (data) => {
@@ -169,7 +174,9 @@ var SlideSelect = React.createClass({
 			touchStartX: 0,
 			supportsTouch: false,
 			suppressIndexUpdate: false,
-			howManySlidesFitOnScreenCompletely: 0
+			howManySlidesFitOnScreenCompletely: 0,
+			showArrows: false,
+			useNativeScroll: false
 		};
 	},
 	componentDidUpdate(){
@@ -200,16 +207,24 @@ var SlideSelect = React.createClass({
 			var slideWidth = Math.floor(holderWidth * slideWidthRatio);
 			var numSlides = slider.props.items.length;
 			var howManySlidesFitOnScreenCompletely = Math.floor(holderWidth / slideWidth);
+			var contentWidth = slideWidth * numSlides;
+			var doWeHaveEnoughContentToScroll = contentWidth > holderWidth;
+			var showArrowsAtBreakpoint = slider.getPropertiesAtBreakpoint(holderWidth).showArrows;
+			var showArrows = slider.props.showArrows && showArrowsAtBreakpoint && doWeHaveEnoughContentToScroll;
+			var forceNativeScrollFallback = !showArrows && doWeHaveEnoughContentToScroll;
+			//We tried feature detection.
+			//Even Modernizr's approach didn't work in all important cases. This is comprehensive _enough_.
+			var supportsTouch = navigator.userAgent.indexOf('Mobile') !== -1;
+			var useNativeScroll = forceNativeScrollFallback || supportsTouch;
 			this.setState({
 				holderWidth: holderWidth,
 				x: slideWidth * slider.state.targetIndex,
 				slideWidth: slideWidth,
-				contentWidth: slideWidth * numSlides,
+				contentWidth: contentWidth,
 				needsResizeUpdate: false,
 				howManySlidesFitOnScreenCompletely: howManySlidesFitOnScreenCompletely,
-				//We tried feature detection.
-				//Even Modernizr's approach didn't work in all important cases. This is comprehensive _enough_.
-				supportsTouch: navigator.userAgent.indexOf('Mobile') !== -1
+				showArrows: showArrows,
+				useNativeScroll: useNativeScroll
 			});
 		}
 	},
@@ -284,18 +299,23 @@ var SlideSelect = React.createClass({
 		));
 		slider.changeIndex(index);
 	},
+	getPropertiesAtBreakpoint(holderWidth){
+		var slider = this;
+		var widthList = slider.props.productSizes.slice();
+		var breakpoint;
+		while (widthList.length) {
+			breakpoint = widthList.pop();
+			if (breakpoint.size < holderWidth) {
+				break;
+			}
+		}
+		return breakpoint;
+	},
 	getSlideWidthRatio(holderWidth){
 		var slider = this;
+		var breakpoint = slider.getPropertiesAtBreakpoint(holderWidth);
 		var result = 1;
 		if (slider.props.fullWidth === false) {
-			var widthList = slider.props.productSizes.slice();
-			var breakpoint;
-			while (widthList.length) {
-				breakpoint = widthList.pop();
-				if (breakpoint.size < holderWidth) {
-					break;
-				}
-			}
 			result = 1 / breakpoint.visibleProducts;
 		}
 		return result;
@@ -335,7 +355,7 @@ var SlideSelect = React.createClass({
 	getDots(){
 		var result;
 		var slider = this;
-		if (this.props.showDots) {
+		if (slider.props.showDots) {
 			var dotList = [];
 			var changeIndex = function(index) {
 				slider.changeIndex(index);
@@ -363,7 +383,7 @@ var SlideSelect = React.createClass({
 	getArrows(){
 		var slider = this;
 		var arrows = [];
-		if (slider.props.showArrows && slider.state.contentWidth > slider.state.holderWidth) {
+		if (slider.state.showArrows) {
 			var prevActive = slider.state.targetIndex !== 0;
 			var nextActive = slider.state.targetIndex !== slider.props.items.length - 1;
 			arrows.push(<Arrow key="prev" direction={-1} active={prevActive} prevNext={slider.prevNext}/>);
@@ -389,14 +409,14 @@ var SlideSelect = React.createClass({
 	},
 	render(){
 		var slider = this;
-		var slideSelectProps = {
-			ref: 'slider',
-			className: `SlideSelect ${slider.state.supportsTouch ? 'nativeScroll ' : ''}${slider.props.type}`,
-			onScroll: slider.handleScroll
-		};
 		var slides = slider.getSlides();
 		var dots = slider.getDots();
 		var arrows = slider.getArrows();
+		var slideSelectProps = {
+			ref: 'slider',
+			className: `SlideSelect ${slider.state.useNativeScroll ? 'nativeScroll ' : ''}${slider.props.type}`,
+			onScroll: slider.handleScroll
+		};
 		return (
 			<div className="SlideSelectHolder" ref="holder">
 				<div {...slideSelectProps}>
