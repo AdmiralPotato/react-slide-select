@@ -125,8 +125,10 @@ var ProductSlide = React.createClass({
 		};
 		return (
 			<li {...slideOptions}>
-				<a onClick={this.click}> <img src={slide.props.data.images[0].smallUrl}/>
-					<span>{slide.props.data.name}</span> </a>
+				<a onClick={this.click}>
+					<img src={slide.props.data.images[0].smallUrl}/>
+					<span>{slide.props.data.name}</span>
+				</a>
 			</li>
 		);
 	}

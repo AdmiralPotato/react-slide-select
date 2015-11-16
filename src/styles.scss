@@ -28,7 +28,6 @@
 				> li {
 					display: block;
 					float: left;
-					font-size: 1.5rem;
 				}
 			}
 		}
@@ -41,13 +40,12 @@
 						display: block;
 						cursor: pointer;
 						text-decoration: none;
-						color: #369;
 						img {
 							width: 100%;
 						}
 						span {
 							display: block;
-							padding: 0.25rem 0;
+							padding: 0.5rem 0 0 0;
 						}
 					}
 				}

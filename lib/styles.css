@@ -19,20 +19,18 @@
         overflow: hidden; }
         .SlideSelectHolder .SlideSelect > ul.slideList > li {
           display: block;
-          float: left;
-          font-size: 1.5rem; }
+          float: left; }
     .SlideSelectHolder .SlideSelect.product > ul.slideList > li {
       padding: 0 0.5rem; }
       .SlideSelectHolder .SlideSelect.product > ul.slideList > li > a {
         display: block;
         cursor: pointer;
-        text-decoration: none;
-        color: #369; }
+        text-decoration: none; }
         .SlideSelectHolder .SlideSelect.product > ul.slideList > li > a img {
           width: 100%; }
         .SlideSelectHolder .SlideSelect.product > ul.slideList > li > a span {
           display: block;
-          padding: 0.25rem 0; }
+          padding: 0.5rem 0 0 0; }
     .SlideSelectHolder .SlideSelect.hero {
       height: 36rem; }
       .SlideSelectHolder .SlideSelect.hero > ul.slideList > li {
