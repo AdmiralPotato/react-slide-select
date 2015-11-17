@@ -20,6 +20,12 @@
 			box-shadow: inset 0 0.5em 0.5em rgba(0,0,0,0.1);
 			padding: 2em 0;
 		}
+		a{
+			color: #369;
+		}
+		a:hover{
+			color: #69c;
+		}
 	</style>
 </head>
 <body>
@@ -36,7 +42,7 @@
 				<div class="col-sm-offset-2 col-sm-8">
 					<p>Here are some react-slide-select demos. This slider provides two features, and 2 features only. 1: You can swipe through a list of "slides". 2: You may "select" one of them, at which point a callback runs I suppose.</p>
 					<h2>Example 1: A "Product" styled slider.</h2>
-					<p>In this example, we see a "Product" styled slider.</p>
+					<p>In this example, we see a "Product" styled slider. You may provide an `items` prop to this class, which should be an array of objects that you intend to have displayed. You should also provide your own function to the onSelect prop on the SlideSelect class. When the onSelect method is invoked, it will be passed the data from the item that you clicked on.</p>
 				</div>
 			</div>
 		</div>
@@ -52,8 +58,25 @@
 		<div class="container">
 			<div class="row">
 				<div class="col-sm-offset-2 col-sm-8">
-					<p>Here are some react-slide-select demos. This slider provides two features, and 2 features only. 1: You can swipe through a list of "slides". 2: You may "select" one of them, at which point a callback runs I suppose.</p>
-					<h2>Example 1: A "Hero" styled slider</h2>
+					<h2>Example 2: A "Product" styled slider with custom children</h2>
+					<p>Please note that the custom inner-child class -must- implement a call to the `this.props.onClick` property for the internal element that you want to be listening to the click event. In this context, when the onSelect passed to the SlideSelect method is invoked, it will only receive the index of the child that you clicked on.</p>
+				</div>
+			</div>
+		</div>
+	</section>
+	<section>
+		<div class="container">
+			<div class="row">
+				<link rel="stylesheet" href="example-custom_children.css" />
+				<div id="example-custom_children">Component not loaded</div>
+			</div>
+		</div>
+	</section>
+	<section>
+		<div class="container">
+			<div class="row">
+				<div class="col-sm-offset-2 col-sm-8">
+					<h2>Example 3: A "Hero" styled slider</h2>
 					<p>In this example, we see a "Hero" styled slider in the wild. This creature has 4 distinct parts of its body. The landing slide has multiple inner call-to-actions, the information only slide has no interactivity, the promotion slide is selectable from anywhere on its surface.</p>
 				</div>
 			</div>
@@ -71,6 +94,8 @@
 	<script src="../lib/react-slide-select.js"></script>
 	<script src="./example-product-data.js"></script>
 	<script src="./example-product.js"></script>
+	<script src="./example-custom_children-data.js"></script>
+	<script src="./example-custom_children.js"></script>
 	<script src="./example-hero.js"></script>
 </body>
 </html>

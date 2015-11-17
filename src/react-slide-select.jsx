@@ -79,9 +79,7 @@ var HeroSlide = React.createClass({
 			style: {
 				backgroundColor: `hsl(${Math.round((slide.props.index / slide.props.setLength) * 360)}, 100%, 50%)`,
 				width: slide.props.width + 'px'
-			},
-			onTouchStart: slide.props.touchStart,
-			onTouchMove: slide.props.touchMove
+			}
 		};
 		return (
 			<li {...slideOptions}>
@@ -94,17 +92,6 @@ var HeroSlide = React.createClass({
 var ProductSlide = React.createClass({
 	getDefaultProps(){
 		return {
-			data: {
-				brand: "FreshLook",
-				id: "000732",
-				manufacturer: "Alcon",
-				name: "FreshLook Colorblends",
-				images: [{
-					"smallUrl": "https://media.1800contacts.com/is/image/1800Contacts/mainproductimage?$image=1800Contacts/000732_demandware&fmt=png-alpha&wid=250&hei=138&op_sharpen=1",
-					"mediumUrl": "https://media.1800contacts.com/is/image/1800Contacts/mainproductimage?$image=1800Contacts/000732_demandware&fmt=png-alpha&wid=350&hei=193&op_sharpen=1",
-					"largeUrl": "https://media.1800contacts.com/is/image/1800Contacts/mainproductimage?$image=1800Contacts/000732_demandware&fmt=png-alpha&wid=500&hei=278&op_sharpen=1"
-				}]
-			},
 			width: 0,
 			index: 0,
 			setLength: 1
@@ -112,23 +99,39 @@ var ProductSlide = React.createClass({
 	},
 	click(){
 		var slide = this;
-		slide.props.onSelect(slide.props.data);
+		slide.props.onSelect(slide.props.data || slide.props.index);
 	},
 	render(){
 		var slide = this;
 		var slideOptions = {
 			style: {
 				width: slide.props.width + 'px'
-			},
-			onTouchStart: slide.props.touchStart,
-			onTouchMove: slide.props.touchMove
+			}
 		};
-		return (
-			<li {...slideOptions}>
-				<a onClick={this.click}>
+		var hasChildren = React.Children.count(slide.props.children) > 0;
+		var child;
+		if (!hasChildren) {
+			child = (
+				<a onClick={slide.click}>
 					<img src={slide.props.data.images[0].smallUrl}/>
 					<span>{slide.props.data.name}</span>
 				</a>
+			);
+		} else {
+			var onlyChild = React.Children.only(slide.props.children);
+			child = React.cloneElement(
+				onlyChild,
+				Object.assign(
+					{
+						onClick: slide.click
+					},
+					onlyChild.props
+				)
+			)
+		}
+		return (
+			<li {...slideOptions}>
+				{child}
 			</li>
 		);
 	}
@@ -171,6 +174,7 @@ var SlideSelect = React.createClass({
 			holderWidth: 0,
 			slideWidth: 0,
 			contentWidth: 0,
+			numSlides: 0,
 			needsResizeUpdate: true,
 			targetIndex: 0,
 			touchStartX: 0,
@@ -207,7 +211,7 @@ var SlideSelect = React.createClass({
 			var holderWidth = holder ? holder.clientWidth : 0;
 			var slideWidthRatio = slider.getSlideWidthRatio(holderWidth);
 			var slideWidth = Math.floor(holderWidth * slideWidthRatio);
-			var numSlides = slider.props.items.length;
+			var numSlides = slider.props.items.length || React.Children.count(slider.props.children);
 			var howManySlidesFitOnScreenCompletely = Math.floor(holderWidth / slideWidth);
 			var contentWidth = slideWidth * numSlides;
 			var doWeHaveEnoughContentToScroll = contentWidth > holderWidth;
@@ -222,6 +226,7 @@ var SlideSelect = React.createClass({
 				holderWidth: holderWidth,
 				x: slideWidth * slider.state.targetIndex,
 				slideWidth: slideWidth,
+				numSlides: numSlides,
 				contentWidth: contentWidth,
 				needsResizeUpdate: false,
 				howManySlidesFitOnScreenCompletely: howManySlidesFitOnScreenCompletely,
@@ -295,7 +300,7 @@ var SlideSelect = React.createClass({
 	},
 	prevNext(direction){
 		var slider = this;
-		var numItems = slider.props.items.length;
+		var numItems = slider.state.numSlides;
 		var index = Math.max(0, Math.min(numItems - 1,
 			slider.state.targetIndex + direction * slider.state.howManySlidesFitOnScreenCompletely
 		));
@@ -331,23 +336,46 @@ var SlideSelect = React.createClass({
 				width: slider.state.contentWidth + 'px'
 			}
 		};
+		var SlideType = slideTypeMap[slider.props.type];
 		var onSelect = (something) => {
 			slider.props.onSelect(something);
 		};
-		slider.props.items.forEach((item, index) => {
-			var slideProps = {
-				key: 'slide-' + index,
-				data: item,
-				index: index,
-				setLength: slider.props.items.length,
-				width: slider.state.slideWidth,
-				onSelect: onSelect
-			};
-			var SlideType = slideTypeMap[this.props.type];
-			slideList.push(
-				<SlideType {...slideProps} />
-			);
-		});
+		if (slider.props.items.length && slider.props.children) {
+			throw new Error('You must pass either items or children to the SlideSelect component, not both.');
+		}
+		else if (!slider.props.items.length && !slider.props.children) {
+			throw new Error('You must pass either items or children to the SlideSelect component.');
+		}
+		if (slider.props.items.length) {
+			slider.props.items.forEach((item, index) => {
+				var slideProps = {
+					key: 'slide-' + index,
+					data: item,
+					index: index,
+					setLength: slider.state.numSlides,
+					width: slider.state.slideWidth,
+					onSelect: onSelect
+				};
+				slideList.push(
+					<SlideType {...slideProps} />
+				);
+			});
+		} else {
+			React.Children.forEach(slider.props.children, (child, index) => {
+				var slideProps = {
+					key: 'slide-' + index,
+					index: index,
+					width: slider.state.slideWidth,
+					setLength: slider.state.numSlides,
+					onSelect: onSelect
+				};
+				slideList.push(
+					<SlideType {...slideProps}>
+						{child}
+					</SlideType>
+				);
+			});
+		}
 		return (
 			<ul {...sliderProps}>
 				{slideList}
@@ -387,7 +415,7 @@ var SlideSelect = React.createClass({
 		var arrows = [];
 		if (slider.state.showArrows) {
 			var prevActive = slider.state.targetIndex !== 0;
-			var nextActive = slider.state.targetIndex !== slider.props.items.length - 1;
+			var nextActive = slider.state.targetIndex !== slider.state.numSlides - 1;
 			arrows.push(<Arrow key="prev" direction={-1} active={prevActive} prevNext={slider.prevNext}/>);
 			arrows.push(<Arrow key="next" direction={ 1} active={nextActive} prevNext={slider.prevNext}/>);
 		}
@@ -404,7 +432,7 @@ var SlideSelect = React.createClass({
 				x: x
 			};
 			if (!slider.state.suppressIndexScrollUpdate) {
-				newState.targetIndex = Math.round(scrollCompletionRatio * (slider.props.items.length - 1));
+				newState.targetIndex = Math.round(scrollCompletionRatio * (slider.state.numSlides - 1));
 			}
 			slider.setState(newState);
 		}
