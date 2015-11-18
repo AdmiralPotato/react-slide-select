@@ -41,19 +41,23 @@
       overflow-scrolling: touch;
       -webkit-overflow-scrolling: touch; }
   .SlideSelectHolder ul.dotList {
-    background-color: #999;
     display: block;
     font-size: 0;
     width: 100%;
-    height: 3rem;
     list-style-type: none; }
     .SlideSelectHolder ul.dotList > li {
       display: inline-block; }
       .SlideSelectHolder ul.dotList > li > a {
+        -webkit-transition: all 125ms;
+        -moz-transition: all 125ms;
+        -ms-transition: all 125ms;
+        transition: all 125ms;
+        position: relative;
         display: block;
-        padding: 0 1rem;
+        padding: 1rem;
         cursor: pointer;
-        text-decoration: none; }
+        text-decoration: none;
+        opacity: 0.5; }
         .SlideSelectHolder ul.dotList > li > a > span {
           display: none; }
         .SlideSelectHolder ul.dotList > li > a:before {
@@ -61,15 +65,19 @@
           -moz-transition: all 250ms;
           -ms-transition: all 250ms;
           transition: all 250ms;
+          content: '';
           display: block;
-          content: '\2022';
-          font-size: 5rem;
-          line-height: 3rem;
-          color: #fff; }
-        .SlideSelectHolder ul.dotList > li > a:hover:before {
-          color: #ccc; }
+          width: 1rem;
+          height: 1rem;
+          -moz-border-radius: 50%;
+          -webkit-border-radius: 50%;
+          border-radius: 50%;
+          border: 1px solid #3C5161;
+          background-color: transparent; }
+        .SlideSelectHolder ul.dotList > li > a:hover {
+          opacity: 1; }
       .SlideSelectHolder ul.dotList > li.active > a:before {
-        color: #000; }
+        background-color: #3C5161; }
   .SlideSelectHolder .arrow {
     position: absolute;
     top: 25%;
