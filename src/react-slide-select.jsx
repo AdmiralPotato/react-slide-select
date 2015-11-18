@@ -182,7 +182,8 @@ var SlideSelect = React.createClass({
 			suppressIndexUpdate: false,
 			howManySlidesFitOnScreenCompletely: 0,
 			showArrows: false,
-			useNativeScroll: false
+			useNativeScroll: false,
+			useScrollSnap: false
 		};
 	},
 	componentDidUpdate(){
@@ -231,7 +232,8 @@ var SlideSelect = React.createClass({
 				needsResizeUpdate: false,
 				howManySlidesFitOnScreenCompletely: howManySlidesFitOnScreenCompletely,
 				showArrows: showArrows,
-				useNativeScroll: useNativeScroll
+				useNativeScroll: useNativeScroll,
+				useScrollSnap: slider.props.fullWidth
 			});
 		}
 	},
@@ -421,6 +423,16 @@ var SlideSelect = React.createClass({
 		}
 		return arrows;
 	},
+	snapToNearestSlideIndexOnScrollStop() {
+		var slider = this;
+		var scrollToNearestWholeIndex = () => {
+			slider.changeIndex(slider.state.targetIndex);
+		};
+		clearTimeout(slider.state.lastScrollTimeoutId);
+		slider.setState({
+			lastScrollTimeoutId: setTimeout(scrollToNearestWholeIndex, 175)
+		});
+	},
 	handleScroll(syntheticScrollEvent) {
 		var slider = this;
 		var x = syntheticScrollEvent.nativeEvent.target.scrollLeft;
@@ -433,6 +445,9 @@ var SlideSelect = React.createClass({
 			};
 			if (!slider.state.suppressIndexScrollUpdate) {
 				newState.targetIndex = Math.round(scrollCompletionRatio * (slider.state.numSlides - 1));
+				if (slider.state.useScrollSnap) {
+					slider.snapToNearestSlideIndexOnScrollStop();
+				}
 			}
 			slider.setState(newState);
 		}
