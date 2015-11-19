@@ -2,12 +2,19 @@ var webpack = require('webpack');
 var path = require('path');
 
 module.exports = {
-	entry: './src/react-slide-select',
+	entry: {
+		'lib/react-slide-select': './src/react-slide-select',
+		'examples/examples': [
+			'./examples/example-custom_children',
+			'./examples/example-product',
+			'./examples/example-hero'
+		]
+	},
 	output: {
 		library: 'SlideSelect',
 		libraryTarget: 'umd',
-		path: path.join(__dirname, 'lib'),
-		filename: 'react-slide-select.js'
+		path: path.resolve(__dirname),
+		filename: '[name].js'
 	},
 	devtool: 'source-map',
 	module: {

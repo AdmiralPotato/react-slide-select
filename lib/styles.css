@@ -12,30 +12,23 @@
     position: relative;
     display: block;
     overflow: hidden; }
-    .SlideSelectHolder .SlideSelect > ul {
-      list-style-type: none; }
-      .SlideSelectHolder .SlideSelect > ul.slideList {
-        position: relative;
-        overflow: hidden; }
-        .SlideSelectHolder .SlideSelect > ul.slideList > li {
-          display: block;
-          float: left; }
-    .SlideSelectHolder .SlideSelect.product > ul.slideList > li {
-      padding: 0 0.5rem; }
-      .SlideSelectHolder .SlideSelect.product > ul.slideList > li > a {
+    .SlideSelectHolder .SlideSelect > ul.slideList {
+      position: relative;
+      overflow: hidden;
+      -webkit-transform: translate3d(0, 0, 0);
+      transform: translate3d(0, 0, 0); }
+      .SlideSelectHolder .SlideSelect > ul.slideList > li {
         display: block;
-        cursor: pointer;
-        text-decoration: none; }
-        .SlideSelectHolder .SlideSelect.product > ul.slideList > li > a img {
-          width: 100%; }
-        .SlideSelectHolder .SlideSelect.product > ul.slideList > li > a span {
+        float: left; }
+        .SlideSelectHolder .SlideSelect > ul.slideList > li > a {
           display: block;
-          padding: 0.5rem 0 0 0; }
-    .SlideSelectHolder .SlideSelect.hero {
-      height: 36rem; }
-      .SlideSelectHolder .SlideSelect.hero > ul.slideList > li {
-        height: 36rem;
-        line-height: 36rem; }
+          cursor: pointer;
+          text-decoration: none; }
+          .SlideSelectHolder .SlideSelect > ul.slideList > li > a > img {
+            width: 100%; }
+          .SlideSelectHolder .SlideSelect > ul.slideList > li > a > span {
+            display: block;
+            padding: 0.5rem 0 0 0; }
     .SlideSelectHolder .SlideSelect.nativeScroll {
       overflow-x: scroll;
       overflow-scrolling: touch;

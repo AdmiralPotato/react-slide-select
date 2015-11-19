@@ -52,101 +52,27 @@ var Dot = React.createClass({
 		var className = this.props.active ? 'active' : '';
 		var dotProps = {
 			onMouseDown: dot.click,
-			onTouchStart: dot.click,
-			title: dot.props.slideName
+			onTouchStart: dot.click
 		};
 		return (
 			<li className={className}>
-				<a {...dotProps}><span>{dot.props.index}</span></a>
+				<a {...dotProps} />
 			</li>
 		);
 	}
 });
 
-var HeroSlide = React.createClass({
-	getDefaultProps(){
-		return {
-			data: 'Hero Name',
-			width: 0,
-			index: 0,
-			setLength: 1
-		}
-	},
-	render(){
-		var slide = this;
-		var slideOptions = {
-			slideName: slide.props.data,
-			style: {
-				backgroundColor: `hsl(${Math.round((slide.props.index / slide.props.setLength) * 360)}, 100%, 50%)`,
-				width: slide.props.width + 'px'
-			}
-		};
-		return (
-			<li {...slideOptions}>
-				{slide.props.data}
-			</li>
-		);
-	}
-});
-
-var ProductSlide = React.createClass({
-	getDefaultProps(){
-		return {
-			width: 0,
-			index: 0,
-			setLength: 1
-		}
-	},
-	click(){
-		var slide = this;
-		slide.props.onSelect(slide.props.data || slide.props.index);
-	},
-	render(){
-		var slide = this;
-		var slideOptions = {
-			style: {
-				width: slide.props.width + 'px'
-			}
-		};
-		var hasChildren = React.Children.count(slide.props.children) > 0;
-		var child;
-		if (!hasChildren) {
-			child = (
-				<a onClick={slide.click}>
-					<img src={slide.props.data.images[0].smallUrl}/>
-					<span>{slide.props.data.name}</span>
-				</a>
-			);
-		} else {
-			var onlyChild = React.Children.only(slide.props.children);
-			child = React.cloneElement(
-				onlyChild,
-				Object.assign(
-					{
-						onClick: slide.click
-					},
-					onlyChild.props
-				)
-			)
-		}
-		return (
-			<li {...slideOptions}>
-				{child}
-			</li>
-		);
-	}
-});
-
-var slideTypeMap = {
-	product: ProductSlide,
-	hero: HeroSlide
+var Slide = (props) => {
+	return (
+		<li style={{width: props.width + 'px'}}>
+			{props.children}
+		</li>
+	);
 };
 
 var SlideSelect = React.createClass({
 	getDefaultProps(){
 		return {
-			type: 'product',
-			items: [],
 			showDots: false,
 			showArrows: true,
 			productSizes: [
@@ -157,14 +83,7 @@ var SlideSelect = React.createClass({
 				{showArrows: 1, visibleProducts: 5.5, size: 950},
 				{showArrows: 1, visibleProducts: 6.5, size: 1010}
 			],
-			fullWidth: false,
-			onSelect: (data) => {
-				alert(
-					`It is intended that you will provide your own method in the onSelect prop for the
-					SlideSelect component, but here's what your function would receive on select:
-					${JSON.stringify(data, null, '\t')}`
-				);
-			}
+			fullWidth: false
 		};
 	},
 	getInitialState(){
@@ -174,7 +93,7 @@ var SlideSelect = React.createClass({
 			holderWidth: 0,
 			slideWidth: 0,
 			contentWidth: 0,
-			numSlides: 0,
+			numSlides: React.Children.count(this.props.children),
 			needsResizeUpdate: true,
 			targetIndex: 0,
 			touchStartX: 0,
@@ -212,9 +131,8 @@ var SlideSelect = React.createClass({
 			var holderWidth = holder ? holder.clientWidth : 0;
 			var slideWidthRatio = slider.getSlideWidthRatio(holderWidth);
 			var slideWidth = Math.floor(holderWidth * slideWidthRatio);
-			var numSlides = slider.props.items.length || React.Children.count(slider.props.children);
 			var howManySlidesFitOnScreenCompletely = Math.floor(holderWidth / slideWidth);
-			var contentWidth = slideWidth * numSlides;
+			var contentWidth = slideWidth * slider.state.numSlides;
 			var doWeHaveEnoughContentToScroll = contentWidth > holderWidth;
 			var showArrowsAtBreakpoint = slider.getPropertiesAtBreakpoint(holderWidth).showArrows;
 			var showArrows = slider.props.showArrows && showArrowsAtBreakpoint && doWeHaveEnoughContentToScroll;
@@ -227,7 +145,6 @@ var SlideSelect = React.createClass({
 				holderWidth: holderWidth,
 				x: slideWidth * slider.state.targetIndex,
 				slideWidth: slideWidth,
-				numSlides: numSlides,
 				contentWidth: contentWidth,
 				needsResizeUpdate: false,
 				howManySlidesFitOnScreenCompletely: howManySlidesFitOnScreenCompletely,
@@ -302,10 +219,13 @@ var SlideSelect = React.createClass({
 	},
 	prevNext(direction){
 		var slider = this;
-		var numItems = slider.state.numSlides;
-		var index = Math.max(0, Math.min(numItems - 1,
-			slider.state.targetIndex + direction * slider.state.howManySlidesFitOnScreenCompletely
-		));
+		var index = Math.max(
+			0,
+			Math.min(
+				slider.state.numSlides - 1,
+				slider.state.targetIndex + direction * slider.state.howManySlidesFitOnScreenCompletely
+			)
+		);
 		slider.changeIndex(index);
 	},
 	getPropertiesAtBreakpoint(holderWidth){
@@ -338,46 +258,20 @@ var SlideSelect = React.createClass({
 				width: slider.state.contentWidth + 'px'
 			}
 		};
-		var SlideType = slideTypeMap[slider.props.type];
-		var onSelect = (something) => {
-			slider.props.onSelect(something);
-		};
-		if (slider.props.items.length && slider.props.children) {
-			throw new Error('You must pass either items or children to the SlideSelect component, not both.');
+		if (slider.state.numSlides < 1) {
+			throw new Error('You must pass children to the SlideSelect component.');
 		}
-		else if (!slider.props.items.length && !slider.props.children) {
-			throw new Error('You must pass either items or children to the SlideSelect component.');
-		}
-		if (slider.props.items.length) {
-			slider.props.items.forEach((item, index) => {
-				var slideProps = {
-					key: 'slide-' + index,
-					data: item,
-					index: index,
-					setLength: slider.state.numSlides,
-					width: slider.state.slideWidth,
-					onSelect: onSelect
-				};
-				slideList.push(
-					<SlideType {...slideProps} />
-				);
-			});
-		} else {
-			React.Children.forEach(slider.props.children, (child, index) => {
-				var slideProps = {
-					key: 'slide-' + index,
-					index: index,
-					width: slider.state.slideWidth,
-					setLength: slider.state.numSlides,
-					onSelect: onSelect
-				};
-				slideList.push(
-					<SlideType {...slideProps}>
-						{child}
-					</SlideType>
-				);
-			});
-		}
+		React.Children.forEach(slider.props.children, (child, index) => {
+			var slideProps = {
+				key: 'slide-' + index,
+				width: slider.state.slideWidth
+			};
+			slideList.push(
+				<Slide {...slideProps}>
+					{child}
+				</Slide>
+			);
+		});
 		return (
 			<ul {...sliderProps}>
 				{slideList}
@@ -392,12 +286,11 @@ var SlideSelect = React.createClass({
 			var changeIndex = function(index) {
 				slider.changeIndex(index);
 			};
-			slider.props.items.forEach((item, index) => {
+			React.Children.forEach(slider.props.children, (item, index) => {
 				var dotProps = {
 					key: 'dot-' + index,
 					changeIndex: changeIndex,
 					index: index,
-					slideName: item,
 					active: slider.state.targetIndex === index
 				};
 				dotList.push(
@@ -459,7 +352,7 @@ var SlideSelect = React.createClass({
 		var arrows = slider.getArrows();
 		var slideSelectProps = {
 			ref: 'slider',
-			className: `SlideSelect ${slider.state.useNativeScroll ? 'nativeScroll ' : ''}${slider.props.type}`,
+			className: `SlideSelect${slider.state.useNativeScroll ? ' nativeScroll' : ''}`,
 			onScroll: slider.handleScroll
 		};
 		return (

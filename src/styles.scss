@@ -21,53 +21,29 @@
 		position: relative;
 		display: block;
 		overflow: hidden;
-		> ul {
-			list-style-type: none;
-			&.slideList {
-				position: relative;
-				overflow: hidden;
-				> li {
+		> ul.slideList {
+			position: relative;
+			overflow: hidden;
+			-webkit-transform: translate3d(0, 0, 0);
+			transform: translate3d(0, 0, 0);
+			> li {
+				display: block;
+				float: left;
+				> a {
 					display: block;
-					float: left;
-				}
-			}
-		}
-
-		&.product {
-			> ul.slideList {
-				> li {
-					padding: 0 0.5rem;
-					> a {
+					cursor: pointer;
+					text-decoration: none;
+					> img {
+						width: 100%;
+					}
+					> span {
 						display: block;
-						cursor: pointer;
-						text-decoration: none;
-						img {
-							width: 100%;
-						}
-						span {
-							display: block;
-							padding: 0.5rem 0 0 0;
-						}
+						padding: 0.5rem 0 0 0;
 					}
-				}
-			}
-			@media screen and (min-width: 480px) {
-				> ul.slideList > li > a {
 				}
 			}
 		}
 
-		&.hero {
-			height: 36rem;
-			> ul {
-				&.slideList {
-					> li {
-						height: 36rem;
-						line-height: 36rem;
-					}
-				}
-			}
-		}
 		&.nativeScroll {
 			overflow-x: scroll;
 			overflow-scrolling: touch;
@@ -180,4 +156,5 @@
 			}
 		}
 	}
+
 }
