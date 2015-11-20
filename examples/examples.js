@@ -299,7 +299,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				return {
 					showDots: false,
 					showArrows: true,
-					productSizes: [{ showArrows: 0, visibleProducts: 2.5, size: 0 }, { showArrows: 0, visibleProducts: 3.5, size: 470 }, { showArrows: 1, visibleProducts: 3.75, size: 630 }, { showArrows: 1, visibleProducts: 4.5, size: 710 }, { showArrows: 1, visibleProducts: 5.5, size: 950 }, { showArrows: 1, visibleProducts: 6.5, size: 1010 }],
+					productSizes: [{ showArrows: 0, showDots: 0, visibleProducts: 2.5, size: 0 }, { showArrows: 0, showDots: 0, visibleProducts: 3.5, size: 470 }, { showArrows: 1, showDots: 1, visibleProducts: 3.75, size: 630 }, { showArrows: 1, showDots: 1, visibleProducts: 4.5, size: 710 }, { showArrows: 1, showDots: 1, visibleProducts: 5.5, size: 950 }, { showArrows: 1, showDots: 1, visibleProducts: 6.5, size: 1010 }],
 					fullWidth: false
 				};
 			},
@@ -352,8 +352,10 @@ return /******/ (function(modules) { // webpackBootstrap
 					var contentWidth = slideWidth * slider.state.numSlides;
 					var doWeHaveEnoughContentToScroll = contentWidth > holderWidth;
 					var showArrowsAtBreakpoint = slider.getPropertiesAtBreakpoint(holderWidth).showArrows;
+					var showDotsAtBreakpoint = slider.getPropertiesAtBreakpoint(holderWidth).showDots;
+					var showDots = slider.props.showDots && showDotsAtBreakpoint && doWeHaveEnoughContentToScroll;
 					var showArrows = slider.props.showArrows && showArrowsAtBreakpoint && doWeHaveEnoughContentToScroll;
-					var forceNativeScrollFallback = !showArrows && doWeHaveEnoughContentToScroll;
+					var forceNativeScrollFallback = !showDots && !showArrows && doWeHaveEnoughContentToScroll;
 					//We tried feature detection.
 					//Even Modernizr's approach didn't work in all important cases. This is comprehensive _enough_.
 					var supportsTouch = navigator.userAgent.indexOf('Mobile') !== -1;
@@ -366,6 +368,7 @@ return /******/ (function(modules) { // webpackBootstrap
 						needsResizeUpdate: false,
 						howManySlidesFitOnScreenCompletely: howManySlidesFitOnScreenCompletely,
 						showArrows: showArrows,
+						showDots: showDots,
 						useNativeScroll: useNativeScroll,
 						useScrollSnap: slider.props.fullWidth
 					});
@@ -491,7 +494,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			getDots: function getDots() {
 				var result;
 				var slider = this;
-				if (slider.props.showDots) {
+				if (slider.state.showDots) {
 					var dotList = [];
 					var changeIndex = function changeIndex(index) {
 						slider.changeIndex(index);

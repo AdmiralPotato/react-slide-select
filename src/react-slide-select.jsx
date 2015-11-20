@@ -76,12 +76,12 @@ var SlideSelect = React.createClass({
 			showDots: false,
 			showArrows: true,
 			productSizes: [
-				{showArrows: 0, visibleProducts: 2.5, size: 0},
-				{showArrows: 0, visibleProducts: 3.5, size: 470},
-				{showArrows: 1, visibleProducts: 3.75, size: 630},
-				{showArrows: 1, visibleProducts: 4.5, size: 710},
-				{showArrows: 1, visibleProducts: 5.5, size: 950},
-				{showArrows: 1, visibleProducts: 6.5, size: 1010}
+				{showArrows: 0, showDots: 0, visibleProducts: 2.5, size: 0},
+				{showArrows: 0, showDots: 0, visibleProducts: 3.5, size: 470},
+				{showArrows: 1, showDots: 1, visibleProducts: 3.75, size: 630},
+				{showArrows: 1, showDots: 1, visibleProducts: 4.5, size: 710},
+				{showArrows: 1, showDots: 1, visibleProducts: 5.5, size: 950},
+				{showArrows: 1, showDots: 1, visibleProducts: 6.5, size: 1010}
 			],
 			fullWidth: false
 		};
@@ -101,6 +101,7 @@ var SlideSelect = React.createClass({
 			suppressIndexUpdate: false,
 			howManySlidesFitOnScreenCompletely: 0,
 			showArrows: false,
+			show: false,
 			useNativeScroll: false,
 			useScrollSnap: false
 		};
@@ -134,9 +135,11 @@ var SlideSelect = React.createClass({
 			var howManySlidesFitOnScreenCompletely = Math.floor(holderWidth / slideWidth);
 			var contentWidth = slideWidth * slider.state.numSlides;
 			var doWeHaveEnoughContentToScroll = contentWidth > holderWidth;
+			var showDotsAtBreakpoint = slider.getPropertiesAtBreakpoint(holderWidth).showDots;
+			var showDots = slider.props.showDots && showDotsAtBreakpoint && doWeHaveEnoughContentToScroll;
 			var showArrowsAtBreakpoint = slider.getPropertiesAtBreakpoint(holderWidth).showArrows;
 			var showArrows = slider.props.showArrows && showArrowsAtBreakpoint && doWeHaveEnoughContentToScroll;
-			var forceNativeScrollFallback = !showArrows && doWeHaveEnoughContentToScroll;
+			var forceNativeScrollFallback = !showDots && !showArrows && doWeHaveEnoughContentToScroll;
 			//We tried feature detection.
 			//Even Modernizr's approach didn't work in all important cases. This is comprehensive _enough_.
 			var supportsTouch = navigator.userAgent.indexOf('Mobile') !== -1;
@@ -149,6 +152,7 @@ var SlideSelect = React.createClass({
 				needsResizeUpdate: false,
 				howManySlidesFitOnScreenCompletely: howManySlidesFitOnScreenCompletely,
 				showArrows: showArrows,
+				showDots: showDots,
 				useNativeScroll: useNativeScroll,
 				useScrollSnap: slider.props.fullWidth
 			});
@@ -281,7 +285,7 @@ var SlideSelect = React.createClass({
 	getDots(){
 		var result;
 		var slider = this;
-		if (slider.props.showDots) {
+		if (slider.state.showDots) {
 			var dotList = [];
 			var changeIndex = function(index) {
 				slider.changeIndex(index);
