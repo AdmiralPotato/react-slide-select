@@ -33,6 +33,10 @@
       overflow-x: scroll;
       overflow-scrolling: touch;
       -webkit-overflow-scrolling: touch; }
+    .SlideSelectHolder .SlideSelect.heroScroll {
+      overflow-x: scroll;
+      overflow-scrolling: scroll;
+      -webkit-overflow-scrolling: scroll; }
   .SlideSelectHolder ul.dotList {
     display: block;
     font-size: 0;

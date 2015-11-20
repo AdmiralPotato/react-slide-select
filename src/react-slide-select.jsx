@@ -103,7 +103,8 @@ var SlideSelect = React.createClass({
 			showArrows: false,
 			show: false,
 			useNativeScroll: false,
-			useScrollSnap: false
+			useScrollSnap: false,
+            canSnapNow: false
 		};
 	},
 	componentDidUpdate(){
@@ -136,14 +137,14 @@ var SlideSelect = React.createClass({
 			var contentWidth = slideWidth * slider.state.numSlides;
 			var doWeHaveEnoughContentToScroll = contentWidth > holderWidth;
 			var showDotsAtBreakpoint = slider.getPropertiesAtBreakpoint(holderWidth).showDots;
-			var showDots = slider.props.showDots && showDotsAtBreakpoint && doWeHaveEnoughContentToScroll;
+			var showDots = slider.props.showDots && (slider.props.fullWidth || (showDotsAtBreakpoint && doWeHaveEnoughContentToScroll));
 			var showArrowsAtBreakpoint = slider.getPropertiesAtBreakpoint(holderWidth).showArrows;
 			var showArrows = slider.props.showArrows && showArrowsAtBreakpoint && doWeHaveEnoughContentToScroll;
-			var forceNativeScrollFallback = !showDots && !showArrows && doWeHaveEnoughContentToScroll;
+			var forceNativeScrollFallback = !showDots && !showArrows && doWeHaveEnoughContentToScroll ;
 			//We tried feature detection.
 			//Even Modernizr's approach didn't work in all important cases. This is comprehensive _enough_.
 			var supportsTouch = navigator.userAgent.indexOf('Mobile') !== -1;
-			var useNativeScroll = forceNativeScrollFallback || supportsTouch;
+			var useNativeScroll = !slider.props.fullWidth && (forceNativeScrollFallback || supportsTouch);
 			this.setState({
 				holderWidth: holderWidth,
 				x: slideWidth * slider.state.targetIndex,
@@ -160,7 +161,7 @@ var SlideSelect = React.createClass({
 	},
 	createTransition(args){
 		var targetValues = args.targetValues;
-		var duration = args.duration || 1000;
+		var duration = args.duration || 500;
 		var interpolationMethod = args.interpolationMethod || ((k) => {
 				return k
 			});
@@ -211,8 +212,9 @@ var SlideSelect = React.createClass({
 				x: this.state.slideWidth * index
 			},
 			interpolationMethod: (k) => {
-				//reference: Circular.Out; https://github.com/tweenjs/tween.js/blob/master/src/Tween.js
-				return Math.sqrt(1 - (--k * k));
+				//reference: Circular.Out; https://github.com/tweenjs/tween.js/blob/master/src/Tween.js#L562
+				return k === 1 ? 1 : 1 - Math.pow(2, - 10 * k);
+				//return Math.sqrt(1 - (--k * k));
 			},
 			callback: () => {
 				slider.setState({
@@ -325,16 +327,18 @@ var SlideSelect = React.createClass({
 		var scrollToNearestWholeIndex = () => {
 			slider.changeIndex(slider.state.targetIndex);
 		};
-		clearTimeout(slider.state.lastScrollTimeoutId);
-		slider.setState({
-			lastScrollTimeoutId: setTimeout(scrollToNearestWholeIndex, 175)
-		});
+		scrollToNearestWholeIndex();
+		//clearTimeout(slider.state.lastScrollTimeoutId);
+		//slider.setState({
+		//	lastScrollTimeoutId: setTimeout(scrollToNearestWholeIndex, 50)
+		//});
 	},
 	handleScroll(syntheticScrollEvent) {
 		var slider = this;
 		var x = syntheticScrollEvent.nativeEvent.target.scrollLeft;
 		var maximumScrollPosition = slider.state.contentWidth - slider.state.holderWidth;
 		var scrollCompletionRatio = x / maximumScrollPosition;
+		console.log(scrollCompletionRatio);
 		//don't allow scroll bounce to set state
 		if (x >= 0 && x <= maximumScrollPosition) {
 			var newState = {
@@ -342,22 +346,41 @@ var SlideSelect = React.createClass({
 			};
 			if (!slider.state.suppressIndexScrollUpdate) {
 				newState.targetIndex = Math.round(scrollCompletionRatio * (slider.state.numSlides - 1));
-				if (slider.state.useScrollSnap) {
-					slider.snapToNearestSlideIndexOnScrollStop();
+				if (slider.state.useScrollSnap && slider.state.canSnapNow) {
+                    slider.snapToNearestSlideIndexOnScrollStop();
 				}
 			}
 			slider.setState(newState);
 		}
+	},
+	handleTouchEnd(synthenticEvent) {
+		var slider = this;
+		slider.setState({canSnapNow: true});
+	},
+	handleTouchMove(synthenticEvent) {
+		var slider = this;
+		slider.setState({canSnapNow: false});
 	},
 	render(){
 		var slider = this;
 		var slides = slider.getSlides();
 		var dots = slider.getDots();
 		var arrows = slider.getArrows();
+		var nativeOrHeroScroll = () => {
+			var newClassName = 'SlideSelect';
+			if(slider.state.useNativeScroll) {
+				newClassName += ' nativeScroll';
+			} else if (slider.state.useScrollSnap) {
+				newClassName += ' heroScroll';
+			}
+			return newClassName;
+		};
 		var slideSelectProps = {
 			ref: 'slider',
-			className: `SlideSelect${slider.state.useNativeScroll ? ' nativeScroll' : ''}`,
-			onScroll: slider.handleScroll
+			className: nativeOrHeroScroll(),
+			onScroll: slider.handleScroll,
+			onTouchEnd: slider.handleTouchEnd,
+			onTouchMove: slider.handleTouchMove
 		};
 		return (
 			<div className="SlideSelectHolder" ref="holder">

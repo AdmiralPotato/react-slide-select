@@ -39,8 +39,10 @@ var imageDataHandler = function(item, photoInfo) {
 	item.image = imageBase + '_q.jpg';
 	item.large = imageBase + '_b.jpg';
 };
+
 var imageDataProvider = function(item) {
-	var baseDataURL = 'https://api.flickr.com/services/rest/?method=flickr.photos.getInfo&api_key=694817a513d8a23eeef9537460cad6e5'
+	var apiKey = 'e5535a9fef9cea5d964b5821e5f8c8f9';
+	var baseDataURL = 'https://api.flickr.com/services/rest/?method=flickr.photos.getInfo&api_key=' + apiKey
 	var photoId = item.photoId;
 	var curryName = 'curry_' + photoId;
 	var callbackName = 'imageDataHandler.' + curryName;
