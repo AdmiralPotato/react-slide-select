@@ -15,24 +15,33 @@ var KittenHero = (props) => {
 	);
 };
 
-var KittenHeroList = (props)=> {
-	var heroList = props.data.map((item, index) => {
-		var itemProps = {
-			key: 'hero-' + index,
-			data: item
-		};
-		return (<KittenHero {...itemProps} />);
-	});
-	return (
-		<SlideSelect {...{
-			showDots: true,
-			showArrows: true,
-			fullWidth: true
-		}}>
-			{heroList}
-		</SlideSelect>
-	);
-};
+var KittenHeroList = React.createClass({
+	changeIndex(index){
+		this.refs.slider.changeIndex(index);
+	},
+	render(){
+		var props = this.props;
+		var heroList = props.data.map((item, index) => {
+			var itemProps = {
+				key: 'hero-' + index,
+				data: item
+			};
+			return (<KittenHero {...itemProps} />);
+		});
+		return (
+			<div className="KittenHeroList">
+				<SlideSelect {...{
+					ref: 'slider',
+					showDots: true,
+					showArrows: true,
+					fullWidth: true
+				}}>
+					{heroList}
+				</SlideSelect>
+			</div>
+		);
+	}
+});
 
 module.exports = KittenHeroList;
 

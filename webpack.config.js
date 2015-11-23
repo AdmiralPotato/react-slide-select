@@ -49,9 +49,10 @@ module.exports = [
 	{
 		entry: {
 			'examples/examples': [
-				'./examples/example-custom_children',
 				'./examples/example-product',
-				'./examples/example-hero'
+				'./examples/example-custom_children',
+				'./examples/example-hero',
+				'./examples/example-change_index'
 			]
 		},
 		output: {
