@@ -52,129 +52,48 @@ var Dot = React.createClass({
 		var className = this.props.active ? 'active' : '';
 		var dotProps = {
 			onMouseDown: dot.click,
-			onTouchStart: dot.click,
-			title: dot.props.slideName
+			onTouchStart: dot.click
 		};
 		return (
 			<li className={className}>
-				<a {...dotProps}><span>{dot.props.index}</span></a>
+				<a {...dotProps} />
 			</li>
 		);
 	}
 });
 
-var HeroSlide = React.createClass({
-	getDefaultProps(){
-		return {
-			data: 'Hero Name',
-			width: 0,
-			index: 0,
-			setLength: 1
-		}
-	},
-	render(){
-		var slide = this;
-		var slideOptions = {
-			slideName: slide.props.data,
-			style: {
-				backgroundColor: `hsl(${Math.round((slide.props.index / slide.props.setLength) * 360)}, 100%, 50%)`,
-				width: slide.props.width + 'px'
-			}
-		};
-		return (
-			<li {...slideOptions}>
-				{slide.props.data}
-			</li>
-		);
-	}
-});
-
-var ProductSlide = React.createClass({
-	getDefaultProps(){
-		return {
-			width: 0,
-			index: 0,
-			setLength: 1
-		}
-	},
-	click(){
-		var slide = this;
-		slide.props.onSelect(slide.props.data || slide.props.index);
-	},
-	render(){
-		var slide = this;
-		var slideOptions = {
-			style: {
-				width: slide.props.width + 'px'
-			}
-		};
-		var hasChildren = React.Children.count(slide.props.children) > 0;
-		var child;
-		if (!hasChildren) {
-			child = (
-				<a onClick={slide.click}>
-					<img src={slide.props.data.images[0].smallUrl}/>
-					<span>{slide.props.data.name}</span>
-				</a>
-			);
-		} else {
-			var onlyChild = React.Children.only(slide.props.children);
-			child = React.cloneElement(
-				onlyChild,
-				Object.assign(
-					{
-						onClick: slide.click
-					},
-					onlyChild.props
-				)
-			)
-		}
-		return (
-			<li {...slideOptions}>
-				{child}
-			</li>
-		);
-	}
-});
-
-var slideTypeMap = {
-	product: ProductSlide,
-	hero: HeroSlide
+var Slide = (props) => {
+	return (
+		<li style={{width: props.width + 'px'}}>
+			{props.children}
+		</li>
+	);
 };
 
 var SlideSelect = React.createClass({
 	getDefaultProps(){
 		return {
-			type: 'product',
-			items: [],
 			showDots: false,
 			showArrows: true,
 			productSizes: [
-				{showArrows: 0, visibleProducts: 2.5, size: 0},
-				{showArrows: 0, visibleProducts: 3.5, size: 470},
-				{showArrows: 1, visibleProducts: 3.75, size: 630},
-				{showArrows: 1, visibleProducts: 4.5, size: 710},
-				{showArrows: 1, visibleProducts: 5.5, size: 950},
-				{showArrows: 1, visibleProducts: 6.5, size: 1010}
+				{showArrows: 0, showDots: 0, visibleProducts: 2.5, size: 0},
+				{showArrows: 0, showDots: 0, visibleProducts: 3.5, size: 470},
+				{showArrows: 1, showDots: 1, visibleProducts: 3.75, size: 630},
+				{showArrows: 1, showDots: 1, visibleProducts: 4.5, size: 710},
+				{showArrows: 1, showDots: 1, visibleProducts: 5.5, size: 950},
+				{showArrows: 1, showDots: 1, visibleProducts: 6.5, size: 1010}
 			],
-			fullWidth: false,
-			onSelect: (data) => {
-				alert(
-					`It is intended that you will provide your own method in the onSelect prop for the
-					SlideSelect component, but here's what your function would receive on select:
-					${JSON.stringify(data, null, '\t')}`
-				);
-			}
+			fullWidth: false
 		};
 	},
 	getInitialState(){
 		return {
 			x: 0,
-			momentum: 0,
+			scrollDirection: 0,
 			holderWidth: 0,
 			slideWidth: 0,
 			contentWidth: 0,
-			numSlides: 0,
+			numSlides: React.Children.count(this.props.children),
 			needsResizeUpdate: true,
 			targetIndex: 0,
 			touchStartX: 0,
@@ -182,6 +101,7 @@ var SlideSelect = React.createClass({
 			suppressIndexUpdate: false,
 			howManySlidesFitOnScreenCompletely: 0,
 			showArrows: false,
+			show: false,
 			useNativeScroll: false,
 			useScrollSnap: false
 		};
@@ -212,13 +132,14 @@ var SlideSelect = React.createClass({
 			var holderWidth = holder ? holder.clientWidth : 0;
 			var slideWidthRatio = slider.getSlideWidthRatio(holderWidth);
 			var slideWidth = Math.floor(holderWidth * slideWidthRatio);
-			var numSlides = slider.props.items.length || React.Children.count(slider.props.children);
 			var howManySlidesFitOnScreenCompletely = Math.floor(holderWidth / slideWidth);
-			var contentWidth = slideWidth * numSlides;
+			var contentWidth = slideWidth * slider.state.numSlides;
 			var doWeHaveEnoughContentToScroll = contentWidth > holderWidth;
+			var showDotsAtBreakpoint = slider.getPropertiesAtBreakpoint(holderWidth).showDots;
+			var showDots = slider.props.showDots && (slider.props.fullWidth || (showDotsAtBreakpoint && doWeHaveEnoughContentToScroll));
 			var showArrowsAtBreakpoint = slider.getPropertiesAtBreakpoint(holderWidth).showArrows;
 			var showArrows = slider.props.showArrows && showArrowsAtBreakpoint && doWeHaveEnoughContentToScroll;
-			var forceNativeScrollFallback = !showArrows && doWeHaveEnoughContentToScroll;
+			var forceNativeScrollFallback = !showDots && !showArrows && doWeHaveEnoughContentToScroll;
 			//We tried feature detection.
 			//Even Modernizr's approach didn't work in all important cases. This is comprehensive _enough_.
 			var supportsTouch = navigator.userAgent.indexOf('Mobile') !== -1;
@@ -227,11 +148,11 @@ var SlideSelect = React.createClass({
 				holderWidth: holderWidth,
 				x: slideWidth * slider.state.targetIndex,
 				slideWidth: slideWidth,
-				numSlides: numSlides,
 				contentWidth: contentWidth,
 				needsResizeUpdate: false,
 				howManySlidesFitOnScreenCompletely: howManySlidesFitOnScreenCompletely,
 				showArrows: showArrows,
+				showDots: showDots,
 				useNativeScroll: useNativeScroll,
 				useScrollSnap: slider.props.fullWidth
 			});
@@ -239,7 +160,7 @@ var SlideSelect = React.createClass({
 	},
 	createTransition(args){
 		var targetValues = args.targetValues;
-		var duration = args.duration || 1000;
+		var duration = args.duration || 400;
 		var interpolationMethod = args.interpolationMethod || ((k) => {
 				return k
 			});
@@ -283,29 +204,37 @@ var SlideSelect = React.createClass({
 		var slider = this;
 		slider.setState({
 			targetIndex: index,
-			suppressIndexScrollUpdate: true
+			scrollDirection: 0,
+			suppressIndexScrollUpdate: true,
+			useNativeScroll: false
 		});
 		slider.createTransition({
 			targetValues: {
 				x: this.state.slideWidth * index
 			},
 			interpolationMethod: (k) => {
-				//reference: Circular.Out; https://github.com/tweenjs/tween.js/blob/master/src/Tween.js
-				return Math.sqrt(1 - (--k * k));
+				//reference: Circular.Out; https://github.com/tweenjs/tween.js/blob/master/src/Tween.js#L562
+				return k === 1 ? 1 : 1 - Math.pow(2, -10 * k);
+				//return Math.sqrt(1 - (--k * k));
 			},
 			callback: () => {
 				slider.setState({
-					suppressIndexScrollUpdate: false
+					suppressIndexScrollUpdate: false,
+					needsResizeUpdate: true
 				});
+				slider.updateDimensions();
 			}
 		});
 	},
 	prevNext(direction){
 		var slider = this;
-		var numItems = slider.state.numSlides;
-		var index = Math.max(0, Math.min(numItems - 1,
-			slider.state.targetIndex + direction * slider.state.howManySlidesFitOnScreenCompletely
-		));
+		var index = Math.max(
+			0,
+			Math.min(
+				slider.state.numSlides - 1,
+				slider.state.targetIndex + direction * slider.state.howManySlidesFitOnScreenCompletely
+			)
+		);
 		slider.changeIndex(index);
 	},
 	getPropertiesAtBreakpoint(holderWidth){
@@ -338,46 +267,20 @@ var SlideSelect = React.createClass({
 				width: slider.state.contentWidth + 'px'
 			}
 		};
-		var SlideType = slideTypeMap[slider.props.type];
-		var onSelect = (something) => {
-			slider.props.onSelect(something);
-		};
-		if (slider.props.items.length && slider.props.children) {
-			throw new Error('You must pass either items or children to the SlideSelect component, not both.');
+		if (slider.state.numSlides < 1) {
+			throw new Error('You must pass children to the SlideSelect component.');
 		}
-		else if (!slider.props.items.length && !slider.props.children) {
-			throw new Error('You must pass either items or children to the SlideSelect component.');
-		}
-		if (slider.props.items.length) {
-			slider.props.items.forEach((item, index) => {
-				var slideProps = {
-					key: 'slide-' + index,
-					data: item,
-					index: index,
-					setLength: slider.state.numSlides,
-					width: slider.state.slideWidth,
-					onSelect: onSelect
-				};
-				slideList.push(
-					<SlideType {...slideProps} />
-				);
-			});
-		} else {
-			React.Children.forEach(slider.props.children, (child, index) => {
-				var slideProps = {
-					key: 'slide-' + index,
-					index: index,
-					width: slider.state.slideWidth,
-					setLength: slider.state.numSlides,
-					onSelect: onSelect
-				};
-				slideList.push(
-					<SlideType {...slideProps}>
-						{child}
-					</SlideType>
-				);
-			});
-		}
+		React.Children.forEach(slider.props.children, (child, index) => {
+			var slideProps = {
+				key: 'slide-' + index,
+				width: slider.state.slideWidth
+			};
+			slideList.push(
+				<Slide {...slideProps}>
+					{child}
+				</Slide>
+			);
+		});
 		return (
 			<ul {...sliderProps}>
 				{slideList}
@@ -387,17 +290,16 @@ var SlideSelect = React.createClass({
 	getDots(){
 		var result;
 		var slider = this;
-		if (slider.props.showDots) {
+		if (slider.state.showDots) {
 			var dotList = [];
 			var changeIndex = function(index) {
 				slider.changeIndex(index);
 			};
-			slider.props.items.forEach((item, index) => {
+			React.Children.forEach(slider.props.children, (item, index) => {
 				var dotProps = {
 					key: 'dot-' + index,
 					changeIndex: changeIndex,
 					index: index,
-					slideName: item,
 					active: slider.state.targetIndex === index
 				};
 				dotList.push(
@@ -425,13 +327,8 @@ var SlideSelect = React.createClass({
 	},
 	snapToNearestSlideIndexOnScrollStop() {
 		var slider = this;
-		var scrollToNearestWholeIndex = () => {
-			slider.changeIndex(slider.state.targetIndex);
-		};
-		clearTimeout(slider.state.lastScrollTimeoutId);
-		slider.setState({
-			lastScrollTimeoutId: setTimeout(scrollToNearestWholeIndex, 175)
-		});
+		var targetIndex = slider.state.targetIndex + slider.state.scrollDirection;
+		slider.changeIndex(targetIndex);
 	},
 	handleScroll(syntheticScrollEvent) {
 		var slider = this;
@@ -445,11 +342,37 @@ var SlideSelect = React.createClass({
 			};
 			if (!slider.state.suppressIndexScrollUpdate) {
 				newState.targetIndex = Math.round(scrollCompletionRatio * (slider.state.numSlides - 1));
-				if (slider.state.useScrollSnap) {
-					slider.snapToNearestSlideIndexOnScrollStop();
-				}
 			}
 			slider.setState(newState);
+		}
+	},
+	handleTouchStart(synthenticEvent) {
+		var slider = this;
+		if (slider.state.useScrollSnap) {
+			slider.setState({
+				touchStartX: slider.state.x
+			});
+		}
+	},
+	updateScrollDirection(){
+		var slider = this;
+		if (slider.state.useScrollSnap) {
+			var xDiff = slider.state.x - slider.state.touchStartX;
+			var sign = (xDiff / Math.abs(xDiff));
+			slider.setState({
+				scrollDirection: isNaN(sign) ? 0 : sign
+			});
+		}
+	},
+	handleTouchMove(synthenticEvent){
+		var slider = this;
+		slider.updateScrollDirection();
+	},
+	handleTouchEnd(synthenticEvent) {
+		var slider = this;
+		slider.updateScrollDirection();
+		if (slider.state.useScrollSnap) {
+			slider.snapToNearestSlideIndexOnScrollStop();
 		}
 	},
 	render(){
@@ -457,10 +380,20 @@ var SlideSelect = React.createClass({
 		var slides = slider.getSlides();
 		var dots = slider.getDots();
 		var arrows = slider.getArrows();
+		var className = ['SlideSelect'];
+		if (slider.state.useNativeScroll) {
+			className.push('nativeScroll');
+		}
+		if (!slider.state.useScrollSnap) {
+			className.push('momentumScroll');
+		}
 		var slideSelectProps = {
 			ref: 'slider',
-			className: `SlideSelect ${slider.state.useNativeScroll ? 'nativeScroll ' : ''}${slider.props.type}`,
-			onScroll: slider.handleScroll
+			className: className.join(' '),
+			onScroll: slider.handleScroll,
+			onTouchStart: slider.handleTouchStart,
+			onTouchMove: slider.handleTouchMove,
+			onTouchEnd: slider.handleTouchEnd
 		};
 		return (
 			<div className="SlideSelectHolder" ref="holder">

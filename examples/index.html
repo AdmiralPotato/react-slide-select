@@ -26,6 +26,10 @@
 		a:hover{
 			color: #69c;
 		}
+		#example-product .SlideSelect > ul.slideList > li,
+		#example-custom_children .SlideSelect > ul.slideList > li {
+			padding: 0 0.5rem;
+		}
 	</style>
 </head>
 <body>
@@ -67,7 +71,25 @@
 	<section>
 		<div class="container">
 			<div class="row">
-				<link rel="stylesheet" href="example-custom_children.css" />
+				<style>
+					.KittenPicker .kittenProduct{
+						padding: 1em;
+						cursor: pointer;
+						text-align: center;
+						color: #666;
+					}
+					.KittenPicker .kittenProduct img {
+						width: 100%;
+						border-radius: 50%;
+						border: 1rem solid #ccc;
+					}
+					.KittenPicker .kittenProduct.selected{
+						color: #0f0;
+					}
+					.KittenPicker .kittenProduct.selected img{
+						border: 1rem solid #0f0;
+					}
+				</style>
 				<div id="example-custom_children">Component not loaded</div>
 			</div>
 		</div>
@@ -85,7 +107,45 @@
 	<section>
 		<div class="container">
 			<div class="row">
+				<style>
+					.KittenHeroList .SlideSelect ul.slideList > li > div {
+						height: 36rem;
+						line-height: 56rem;
+						font-size: 32px;
+						color: #fff;
+						text-shadow: 0 0 2rem #000, 0 0 1rem #000;
+						background-size: cover;
+						background-position: center center;
+					}
+				</style>
 				<div id="example-hero">Component not loaded</div>
+			</div>
+		</div>
+	</section>
+	<section>
+		<div class="container">
+			<div class="row">
+				<div class="col-sm-offset-2 col-sm-8">
+					<h2>Example 4: A "Hero" styled slider that is controlled by a smaller picker</h2>
+					<p>Click on the smaller selector to change the index of the top hero. Bam. Cross component communication.</p>
+				</div>
+			</div>
+		</div>
+	</section>
+	<section>
+		<div class="container">
+			<div class="row">
+				<div id="example-change_index">Component not loaded</div>
+			</div>
+		</div>
+	</section>
+	<section>
+		<div class="container">
+			<div class="row">
+				<div class="col-sm-offset-2 col-sm-8">
+					<h2>That's all, Folks!</h2>
+					<p>Okay! I hope you like it!</p>
+				</div>
 			</div>
 		</div>
 	</section>
@@ -93,9 +153,7 @@
 	<script src="../node_modules/react-dom/dist/react-dom.js"></script>
 	<script src="../lib/react-slide-select.js"></script>
 	<script src="./example-product-data.js"></script>
-	<script src="./example-product.js"></script>
-	<script src="./example-custom_children-data.js"></script>
-	<script src="./example-custom_children.js"></script>
-	<script src="./example-hero.js"></script>
+	<script src="./example-data.js"></script>
+	<script src="./examples.js"></script>
 </body>
 </html>
