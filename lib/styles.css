@@ -30,13 +30,10 @@
             display: block;
             padding: 0.5rem 0 0 0; }
     .SlideSelectHolder .SlideSelect.nativeScroll {
-      overflow-x: scroll;
-      overflow-scrolling: touch;
-      -webkit-overflow-scrolling: touch; }
-    .SlideSelectHolder .SlideSelect.heroScroll {
-      overflow-x: scroll;
-      overflow-scrolling: scroll;
-      -webkit-overflow-scrolling: scroll; }
+      overflow-x: scroll; }
+    .SlideSelectHolder .SlideSelect.momentumScroll {
+      -webkit-overflow-scrolling: touch;
+      overflow-scrolling: touch; }
   .SlideSelectHolder ul.dotList {
     display: block;
     font-size: 0;

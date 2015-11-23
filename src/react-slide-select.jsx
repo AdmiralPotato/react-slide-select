@@ -89,7 +89,7 @@ var SlideSelect = React.createClass({
 	getInitialState(){
 		return {
 			x: 0,
-			momentum: 0,
+			scrollDirection: 0,
 			holderWidth: 0,
 			slideWidth: 0,
 			contentWidth: 0,
@@ -103,8 +103,7 @@ var SlideSelect = React.createClass({
 			showArrows: false,
 			show: false,
 			useNativeScroll: false,
-			useScrollSnap: false,
-            canSnapNow: false
+			useScrollSnap: false
 		};
 	},
 	componentDidUpdate(){
@@ -140,11 +139,11 @@ var SlideSelect = React.createClass({
 			var showDots = slider.props.showDots && (slider.props.fullWidth || (showDotsAtBreakpoint && doWeHaveEnoughContentToScroll));
 			var showArrowsAtBreakpoint = slider.getPropertiesAtBreakpoint(holderWidth).showArrows;
 			var showArrows = slider.props.showArrows && showArrowsAtBreakpoint && doWeHaveEnoughContentToScroll;
-			var forceNativeScrollFallback = !showDots && !showArrows && doWeHaveEnoughContentToScroll ;
+			var forceNativeScrollFallback = !showDots && !showArrows && doWeHaveEnoughContentToScroll;
 			//We tried feature detection.
 			//Even Modernizr's approach didn't work in all important cases. This is comprehensive _enough_.
 			var supportsTouch = navigator.userAgent.indexOf('Mobile') !== -1;
-			var useNativeScroll = !slider.props.fullWidth && (forceNativeScrollFallback || supportsTouch);
+			var useNativeScroll = forceNativeScrollFallback || supportsTouch;
 			this.setState({
 				holderWidth: holderWidth,
 				x: slideWidth * slider.state.targetIndex,
@@ -205,6 +204,7 @@ var SlideSelect = React.createClass({
 		var slider = this;
 		slider.setState({
 			targetIndex: index,
+			scrollDirection: 0,
 			suppressIndexScrollUpdate: true
 		});
 		slider.createTransition({
@@ -213,7 +213,7 @@ var SlideSelect = React.createClass({
 			},
 			interpolationMethod: (k) => {
 				//reference: Circular.Out; https://github.com/tweenjs/tween.js/blob/master/src/Tween.js#L562
-				return k === 1 ? 1 : 1 - Math.pow(2, - 10 * k);
+				return k === 1 ? 1 : 1 - Math.pow(2, -10 * k);
 				//return Math.sqrt(1 - (--k * k));
 			},
 			callback: () => {
@@ -324,21 +324,16 @@ var SlideSelect = React.createClass({
 	},
 	snapToNearestSlideIndexOnScrollStop() {
 		var slider = this;
-		var scrollToNearestWholeIndex = () => {
-			slider.changeIndex(slider.state.targetIndex);
-		};
-		scrollToNearestWholeIndex();
-		//clearTimeout(slider.state.lastScrollTimeoutId);
-		//slider.setState({
-		//	lastScrollTimeoutId: setTimeout(scrollToNearestWholeIndex, 50)
-		//});
+		var targetIndex = slider.state.targetIndex + slider.state.scrollDirection;
+		slider.changeIndex(targetIndex);
+		console.log(slider.state.targetIndex, slider.state.scrollDirection, targetIndex);
+
 	},
 	handleScroll(syntheticScrollEvent) {
 		var slider = this;
 		var x = syntheticScrollEvent.nativeEvent.target.scrollLeft;
 		var maximumScrollPosition = slider.state.contentWidth - slider.state.holderWidth;
 		var scrollCompletionRatio = x / maximumScrollPosition;
-		console.log(scrollCompletionRatio);
 		//don't allow scroll bounce to set state
 		if (x >= 0 && x <= maximumScrollPosition) {
 			var newState = {
@@ -346,41 +341,62 @@ var SlideSelect = React.createClass({
 			};
 			if (!slider.state.suppressIndexScrollUpdate) {
 				newState.targetIndex = Math.round(scrollCompletionRatio * (slider.state.numSlides - 1));
-				if (slider.state.useScrollSnap && slider.state.canSnapNow) {
-                    slider.snapToNearestSlideIndexOnScrollStop();
-				}
 			}
 			slider.setState(newState);
 		}
 	},
+	handleTouchStart(synthenticEvent) {
+		var slider = this;
+		if (slider.state.useScrollSnap) {
+			slider.setState({
+				touchStartX: slider.state.x
+			});
+		}
+		console.log('touchStart', slider.state);
+	},
+	updateScrollDirection(){
+		var slider = this;
+		if (slider.state.useScrollSnap) {
+			var xDiff = slider.state.x - slider.state.touchStartX;
+			var sign = (xDiff / Math.abs(xDiff));
+			slider.setState({
+				scrollDirection: isNaN(sign) ? 0 : sign
+			});
+		}
+	},
+	handleTouchMove(synthenticEvent){
+		var slider = this;
+		slider.updateScrollDirection();
+		console.log('touchMove', slider.state);
+	},
 	handleTouchEnd(synthenticEvent) {
 		var slider = this;
-		slider.setState({canSnapNow: true});
-	},
-	handleTouchMove(synthenticEvent) {
-		var slider = this;
-		slider.setState({canSnapNow: false});
+		slider.updateScrollDirection();
+		console.log('touchEnd', slider.state);
+		if (slider.state.useScrollSnap) {
+			slider.snapToNearestSlideIndexOnScrollStop();
+		}
+		console.log(slider.state);
 	},
 	render(){
 		var slider = this;
 		var slides = slider.getSlides();
 		var dots = slider.getDots();
 		var arrows = slider.getArrows();
-		var nativeOrHeroScroll = () => {
-			var newClassName = 'SlideSelect';
-			if(slider.state.useNativeScroll) {
-				newClassName += ' nativeScroll';
-			} else if (slider.state.useScrollSnap) {
-				newClassName += ' heroScroll';
-			}
-			return newClassName;
-		};
+		var className = ['SlideSelect'];
+		if (slider.state.useNativeScroll) {
+			className.push('nativeScroll');
+		}
+		if (!slider.state.useScrollSnap) {
+			className.push('momentumScroll');
+		}
 		var slideSelectProps = {
 			ref: 'slider',
-			className: nativeOrHeroScroll(),
+			className: className.join(' '),
 			onScroll: slider.handleScroll,
-			onTouchEnd: slider.handleTouchEnd,
-			onTouchMove: slider.handleTouchMove
+			onTouchStart: slider.handleTouchStart,
+			onTouchMove: slider.handleTouchMove,
+			onTouchEnd: slider.handleTouchEnd
 		};
 		return (
 			<div className="SlideSelectHolder" ref="holder">

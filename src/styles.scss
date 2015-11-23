@@ -46,13 +46,10 @@
 
 		&.nativeScroll {
 			overflow-x: scroll;
-			overflow-scrolling: touch;
-			-webkit-overflow-scrolling: touch;
 		}
-		&.heroScroll {
-			overflow-x: scroll;
-			overflow-scrolling: scroll;
-			-webkit-overflow-scrolling: scroll;
+		&.momentumScroll {
+			-webkit-overflow-scrolling: touch;
+			overflow-scrolling: touch;
 		}
 	}
 
