@@ -160,7 +160,7 @@ var SlideSelect = React.createClass({
 	},
 	createTransition(args){
 		var targetValues = args.targetValues;
-		var duration = args.duration || 500;
+		var duration = args.duration || 400;
 		var interpolationMethod = args.interpolationMethod || ((k) => {
 				return k
 			});
@@ -205,7 +205,8 @@ var SlideSelect = React.createClass({
 		slider.setState({
 			targetIndex: index,
 			scrollDirection: 0,
-			suppressIndexScrollUpdate: true
+			suppressIndexScrollUpdate: true,
+			useNativeScroll: false
 		});
 		slider.createTransition({
 			targetValues: {
@@ -218,8 +219,10 @@ var SlideSelect = React.createClass({
 			},
 			callback: () => {
 				slider.setState({
-					suppressIndexScrollUpdate: false
+					suppressIndexScrollUpdate: false,
+					needsResizeUpdate: true
 				});
+				slider.updateDimensions();
 			}
 		});
 	},
@@ -326,8 +329,6 @@ var SlideSelect = React.createClass({
 		var slider = this;
 		var targetIndex = slider.state.targetIndex + slider.state.scrollDirection;
 		slider.changeIndex(targetIndex);
-		console.log(slider.state.targetIndex, slider.state.scrollDirection, targetIndex);
-
 	},
 	handleScroll(syntheticScrollEvent) {
 		var slider = this;
@@ -352,7 +353,6 @@ var SlideSelect = React.createClass({
 				touchStartX: slider.state.x
 			});
 		}
-		console.log('touchStart', slider.state);
 	},
 	updateScrollDirection(){
 		var slider = this;
@@ -367,16 +367,13 @@ var SlideSelect = React.createClass({
 	handleTouchMove(synthenticEvent){
 		var slider = this;
 		slider.updateScrollDirection();
-		console.log('touchMove', slider.state);
 	},
 	handleTouchEnd(synthenticEvent) {
 		var slider = this;
 		slider.updateScrollDirection();
-		console.log('touchEnd', slider.state);
 		if (slider.state.useScrollSnap) {
 			slider.snapToNearestSlideIndexOnScrollStop();
 		}
-		console.log(slider.state);
 	},
 	render(){
 		var slider = this;
