@@ -272,7 +272,7 @@ var SlideSelect = React.createClass({
 			}
 		};
 		if (slider.state.useScrollSnap) {
-			sliderProps.style.transform = `translate3d(-${slider.state.x}px, 0, 0)`;
+			sliderProps.style.transform = `translate3d(${-slider.state.x}px, 0, 0)`;
 		}
 		if (slider.state.numSlides < 1) {
 			throw new Error('You must pass children to the SlideSelect component.');
@@ -332,9 +332,13 @@ var SlideSelect = React.createClass({
 		}
 		return arrows;
 	},
+	boundValue(min, max, value){
+		return Math.max(min, Math.min(max, value));
+	},
 	snapToNearestSlideIndexOnScrollStop() {
 		var slider = this;
-		var targetIndex = slider.state.targetIndex + slider.state.scrollDirection;
+		var requestedIndex = slider.state.targetIndex + slider.state.scrollDirection;
+		var targetIndex = slider.boundValue(0, slider.state.numSlides - 1, requestedIndex);
 		slider.changeIndex(targetIndex);
 	},
 	handleScroll(syntheticScrollEvent) {
@@ -389,13 +393,17 @@ var SlideSelect = React.createClass({
 			}
 		}
 	},
+	getAbsoluteXFromRelativeTouch(touch){
+		var slider = this;
+		return slider.state.startX + (slider.state.touchStartX - touch.clientX);
+	},
 	handleTouchMove(synthenticEvent){
 		var slider = this;
 		if (slider.state.useScrollSnap) {
 			var touch = slider.getTouchDataByStateId(synthenticEvent);
 			if (touch) {
 				slider.setState({
-					x: slider.state.startX + (slider.state.touchStartX - touch.clientX)
+					x: slider.getAbsoluteXFromRelativeTouch(touch)
 				});
 				slider.updateScrollDirection();
 			}
@@ -407,7 +415,7 @@ var SlideSelect = React.createClass({
 			var touch = slider.getTouchDataByStateId(synthenticEvent);
 			if (touch) {
 				slider.setState({
-					x: slider.state.startX + (slider.state.touchStartX - touch.clientX),
+					x: slider.getAbsoluteXFromRelativeTouch(touch),
 					startTouchId: null
 				});
 				slider.updateScrollDirection();
