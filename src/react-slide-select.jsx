@@ -356,7 +356,7 @@ var SlideSelect = React.createClass({
 	updateScrollDirection(){
 		var slider = this;
 		if (slider.state.useScrollSnap) {
-			var xDiff = slider.state.x - slider.state.touchStartX;
+			var xDiff = slider.state.x - slider.state.startX;
 			var sign = (xDiff / Math.abs(xDiff));
 			slider.setState({
 				scrollDirection: isNaN(sign) ? 0 : sign
@@ -383,6 +383,7 @@ var SlideSelect = React.createClass({
 				var touch = synthenticEvent.changedTouches[0];
 				slider.setState({
 					touchStartX: touch.clientX,
+					startX: slider.state.x,
 					startTouchId: touch.identifier
 				});
 			}
@@ -394,7 +395,7 @@ var SlideSelect = React.createClass({
 			var touch = slider.getTouchDataByStateId(synthenticEvent);
 			if (touch) {
 				slider.setState({
-					x: slider.state.x + (slider.state.touchStartX - touch.clientX)
+					x: slider.state.startX + (slider.state.touchStartX - touch.clientX)
 				});
 				slider.updateScrollDirection();
 			}
@@ -404,9 +405,9 @@ var SlideSelect = React.createClass({
 		var slider = this;
 		if (slider.state.useScrollSnap) {
 			var touch = slider.getTouchDataByStateId(synthenticEvent);
-			if(touch){
+			if (touch) {
 				slider.setState({
-					x: slider.state.x + (slider.state.touchStartX - touch.clientX),
+					x: slider.state.startX + (slider.state.touchStartX - touch.clientX),
 					startTouchId: null
 				});
 				slider.updateScrollDirection();
