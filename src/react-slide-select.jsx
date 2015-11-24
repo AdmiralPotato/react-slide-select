@@ -103,13 +103,17 @@ var SlideSelect = React.createClass({
 			showArrows: false,
 			show: false,
 			useNativeScroll: false,
-			useScrollSnap: false
+			useScrollSnap: false,
+			startTouchId: null
 		};
 	},
 	componentDidUpdate(){
-		this.updateDimensions();
-		var sliderElement = ReactDOM.findDOMNode(this.refs['slider']);
-		sliderElement.scrollLeft = this.state.x;
+		var slider = this;
+		slider.updateDimensions();
+		var sliderElement = ReactDOM.findDOMNode(slider.refs['slider']);
+		if (!slider.state.useScrollSnap) {
+			sliderElement.scrollLeft = slider.state.x;
+		}
 	},
 	componentDidMount(){
 		window.addEventListener('resize', this.invalidateDimensions);
@@ -267,6 +271,9 @@ var SlideSelect = React.createClass({
 				width: slider.state.contentWidth + 'px'
 			}
 		};
+		if (slider.state.useScrollSnap) {
+			sliderProps.style.transform = `translate3d(-${slider.state.x}px, 0, 0)`;
+		}
 		if (slider.state.numSlides < 1) {
 			throw new Error('You must pass children to the SlideSelect component.');
 		}
@@ -346,14 +353,6 @@ var SlideSelect = React.createClass({
 			slider.setState(newState);
 		}
 	},
-	handleTouchStart(synthenticEvent) {
-		var slider = this;
-		if (slider.state.useScrollSnap) {
-			slider.setState({
-				touchStartX: slider.state.x
-			});
-		}
-	},
 	updateScrollDirection(){
 		var slider = this;
 		if (slider.state.useScrollSnap) {
@@ -364,15 +363,55 @@ var SlideSelect = React.createClass({
 			});
 		}
 	},
+	getTouchDataByStateId(event){
+		var slider = this;
+		var touches = event.changedTouches;
+		var result = null;
+		for (var i = 0; i < touches.length; i++) {
+			var touch = touches[i];
+			if (touch.identifier === slider.state.startTouchId) {
+				result = touch;
+				break;
+			}
+		}
+		return result;
+	},
+	handleTouchStart(synthenticEvent) {
+		var slider = this;
+		if (slider.state.useScrollSnap) {
+			if (slider.state.startTouchId === null) {
+				var touch = synthenticEvent.changedTouches[0];
+				slider.setState({
+					touchStartX: touch.clientX,
+					startTouchId: touch.identifier
+				});
+			}
+		}
+	},
 	handleTouchMove(synthenticEvent){
 		var slider = this;
-		slider.updateScrollDirection();
+		if (slider.state.useScrollSnap) {
+			var touch = slider.getTouchDataByStateId(synthenticEvent);
+			if (touch) {
+				slider.setState({
+					x: slider.state.x + (slider.state.touchStartX - touch.clientX)
+				});
+				slider.updateScrollDirection();
+			}
+		}
 	},
 	handleTouchEnd(synthenticEvent) {
 		var slider = this;
-		slider.updateScrollDirection();
 		if (slider.state.useScrollSnap) {
-			slider.snapToNearestSlideIndexOnScrollStop();
+			var touch = slider.getTouchDataByStateId(synthenticEvent);
+			if(touch){
+				slider.setState({
+					x: slider.state.x + (slider.state.touchStartX - touch.clientX),
+					startTouchId: null
+				});
+				slider.updateScrollDirection();
+				slider.snapToNearestSlideIndexOnScrollStop();
+			}
 		}
 	},
 	render(){
@@ -381,7 +420,7 @@ var SlideSelect = React.createClass({
 		var dots = slider.getDots();
 		var arrows = slider.getArrows();
 		var className = ['SlideSelect'];
-		if (slider.state.useNativeScroll) {
+		if (slider.state.useNativeScroll && !slider.state.useScrollSnap) {
 			className.push('nativeScroll');
 		}
 		if (!slider.state.useScrollSnap) {
