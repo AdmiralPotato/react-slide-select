@@ -119,11 +119,11 @@ var SlideSelect = React.createClass({
 	},
 	componentDidMount(){
 		var slider = this;
-		window.addEventListener('resize', this.invalidateDimensions);
+		window.addEventListener('resize', slider.invalidateDimensions);
 		slider.updateDimensions();
 		slider.setState({
 			resizeFallbackIntervalId: setInterval(() => {
-				slider.fallbackParentSizeWatch();
+				slider.fallbackStateUpdate();
 			}, 200)
 		});
 	},
@@ -137,11 +137,13 @@ var SlideSelect = React.createClass({
 			needsResizeUpdate: true
 		});
 	},
-	fallbackParentSizeWatch(){
+	fallbackStateUpdate(){
 		var slider = this;
 		var holder = ReactDOM.findDOMNode(slider.refs['holder']);
 		var holderWidth = holder ? holder.clientWidth : 0;
-		if (slider.state.holderWidth !== holderWidth) {
+		var holderWidthHasChanged = slider.state.holderWidth !== holderWidth;
+		var numberOfChildrenHasChanged = slider.state.numSlides !== React.Children.count(slider.props.children);
+		if (holderWidthHasChanged || numberOfChildrenHasChanged) {
 			slider.invalidateDimensions();
 			slider.updateDimensions();
 		}
@@ -152,10 +154,11 @@ var SlideSelect = React.createClass({
 		if (slider.state.needsResizeUpdate) {
 			var holder = ReactDOM.findDOMNode(slider.refs['holder']);
 			var holderWidth = holder ? holder.clientWidth : 0;
+			var numSlides = React.Children.count(slider.props.children);
 			var slideWidthRatio = slider.getSlideWidthRatio(holderWidth);
 			var slideWidth = Math.floor(holderWidth * slideWidthRatio);
 			var howManySlidesFitOnScreenCompletely = Math.floor(holderWidth / slideWidth);
-			var contentWidth = slideWidth * slider.state.numSlides;
+			var contentWidth = slideWidth * numSlides;
 			var doWeHaveEnoughContentToScroll = contentWidth > holderWidth;
 			var showDotsAtBreakpoint = slider.getPropertiesAtBreakpoint(holderWidth).showDots;
 			var showDots = slider.props.showDots && (slider.props.fullWidth || (showDotsAtBreakpoint && doWeHaveEnoughContentToScroll));
@@ -169,6 +172,7 @@ var SlideSelect = React.createClass({
 			slider.setState({
 				holderWidth: holderWidth,
 				x: slideWidth * slider.state.targetIndex,
+				numSlides: numSlides,
 				slideWidth: slideWidth,
 				contentWidth: contentWidth,
 				needsResizeUpdate: false,
