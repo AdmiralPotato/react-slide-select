@@ -96,7 +96,7 @@ var SlideSelect = React.createClass({
 			numSlides: React.Children.count(this.props.children),
 			needsResizeUpdate: true,
 			targetIndex: 0,
-			touchStartX: 0,
+			startDragX: 0,
 			supportsTouch: false,
 			suppressIndexUpdate: false,
 			howManySlidesFitOnScreenCompletely: 0,
@@ -104,7 +104,7 @@ var SlideSelect = React.createClass({
 			show: false,
 			useNativeScroll: false,
 			useScrollSnap: false,
-			startTouchId: null
+			startDragId: null
 		};
 	},
 	componentDidUpdate(){
@@ -357,84 +357,114 @@ var SlideSelect = React.createClass({
 			slider.setState(newState);
 		}
 	},
-	getRelativeScrollDirection(x){
+	getRelativeDragDirection(x){
 		var slider = this;
 		var xDiff = x - slider.state.startX;
 		var sign = (xDiff / Math.abs(xDiff));
 		return isNaN(sign) ? 0 : sign;
 	},
-	getTouchDataByStateId(event){
+	dragStart(point) {
 		var slider = this;
-		var touches = event.changedTouches;
-		var result = null;
-		for (var i = 0; i < touches.length; i++) {
-			var touch = touches[i];
-			if (touch.identifier === slider.state.startTouchId) {
-				result = touch;
-				break;
+		slider.setState({
+			startDragId: point.id,
+			startDragX: point.x,
+			startDragY: point.y,
+			startX: slider.state.x
+		});
+	},
+	getAbsoluteXFromRelativeX(x){
+		var slider = this;
+		return slider.state.startX + (slider.state.startDragX - x);
+	},
+	dragMove(point, event){
+		event.persist();
+		var slider = this;
+		if (Math.abs(point.y - slider.state.startDragY) < 50) {
+			event.preventDefault();
+			var x = slider.getAbsoluteXFromRelativeX(point.x);
+			slider.setState({
+				x: x
+			});
+		}
+	},
+	dragEnd(point, event){
+		var slider = this;
+		if (slider.state.startDragId !== null) {
+			var newState = {
+				startDragId: null
+			};
+			if (Math.abs(point.y - slider.state.startDragY) < 50) {
+				event.preventDefault();
+				var x = slider.getAbsoluteXFromRelativeX(point.x);
+				newState.x = x;
+				newState.scrollDirection = slider.getRelativeDragDirection(x)
+			} else {
+				newState.scrollDirection = 0;
 			}
+			slider.setState(
+				newState,
+				() => {
+					slider.snapToNearestSlideIndexOnScrollStop();
+				}
+			);
+		}
+	},
+	getPointByTouch(syntheticTouchEvent){
+		var slider = this;
+		var touches = syntheticTouchEvent.changedTouches;
+		var result = null;
+		var point = null;
+		if (slider.state.startDragId === null) {
+			result = touches[0];
+		} else {
+			for (var i = 0; i < touches.length; i++) {
+				var touch = touches[i];
+				if (touch.identifier === slider.state.startDragId) {
+					result = touch;
+					break;
+				}
+			}
+		}
+		if (result) {
+			point = {
+				x: result.clientX,
+				y: result.screenY,
+				id: result.identifier
+			};
+		}
+		return point;
+	},
+	getPointByMouse(syntheticMouseEvent){
+		var result = null;
+		var button = syntheticMouseEvent.buttons;
+		var isNotMoveEvent = syntheticMouseEvent.type !== 'mousemove';
+		var isMoveEventAndMouseDown = syntheticMouseEvent.type === 'mousemove' && (button === 1 || button === 4);
+		if (isNotMoveEvent || isMoveEventAndMouseDown) {
+			result = {
+				x: syntheticMouseEvent.clientX,
+				y: 0, //we're not scrolling the page Y with this device, never report
+				id: 'mouse'
+			};
 		}
 		return result;
 	},
-	handleTouchStart(syntheticTouchEvent) {
+	handleMouse(eventName){
 		var slider = this;
-		if (slider.state.useScrollSnap) {
-			//syntheticTouchEvent.preventDefault();
-			if (slider.state.startTouchId === null) {
-				var touch = syntheticTouchEvent.changedTouches[0];
-				slider.setState({
-					touchStartX: touch.clientX,
-					startX: slider.state.x,
-					startY: touch.screenY,
-					startTouchId: touch.identifier
-				});
+		return (syntheticMouseEvent) => {
+			var point = slider.getPointByMouse(syntheticMouseEvent);
+			if (point) {
+				slider[`drag${eventName}`](point, syntheticMouseEvent);
 			}
-		}
+		};
 	},
-	getAbsoluteXFromRelativeTouch(touch){
+	handleTouch(eventName){
 		var slider = this;
-		return slider.state.startX + (slider.state.touchStartX - touch.clientX);
-	},
-	handleTouchMove(syntheticTouchEvent){
-		syntheticTouchEvent.persist();
-		var slider = this;
-		if (slider.state.useScrollSnap) {
-			var touch = slider.getTouchDataByStateId(syntheticTouchEvent);
-			if (touch) {
-				if (Math.abs(touch.screenY - slider.state.startY) < 50) {
-					syntheticTouchEvent.preventDefault();
-					var x = slider.getAbsoluteXFromRelativeTouch(touch);
-					slider.setState({
-						x: x
-					});
-				}
+		return (syntheticTouchEvent) => {
+			var point = slider.getPointByTouch(syntheticTouchEvent);
+			if (point) {
+				slider[`drag${eventName}`](point, syntheticTouchEvent);
 			}
-		}
-	},
-	handleTouchEnd(syntheticTouchEvent) {
-		var slider = this;
-		if (slider.state.useScrollSnap) {
-			var touch = slider.getTouchDataByStateId(syntheticTouchEvent);
-			if (touch) {
-				var newState = {
-					startTouchId: null
-				};
-				if (Math.abs(touch.screenY - slider.state.startY) < 50) {
-					syntheticTouchEvent.preventDefault();
-					var x = slider.getAbsoluteXFromRelativeTouch(touch);
-					newState.x = x;
-					newState.scrollDirection = slider.getRelativeScrollDirection(x)
-				} else {
-					newState.scrollDirection = 0;
-				}
-				slider.setState(
-					newState,
-					() => {
-						slider.snapToNearestSlideIndexOnScrollStop();
-					}
-				);
-			}
-		}
+		};
 	},
 	render(){
 		var slider = this;
@@ -451,11 +481,17 @@ var SlideSelect = React.createClass({
 		var slideSelectProps = {
 			ref: 'slider',
 			className: className.join(' '),
-			onScroll: slider.handleScroll,
-			onTouchStart: slider.handleTouchStart,
-			onTouchMove: slider.handleTouchMove,
-			onTouchEnd: slider.handleTouchEnd
+			onScroll: slider.handleScroll
 		};
+		if (slider.state.useScrollSnap) {
+			slideSelectProps.onMouseDown = slider.handleMouse('Start');
+			slideSelectProps.onMouseMove = slider.handleMouse('Move');
+			slideSelectProps.onMouseUp = slider.handleMouse('End');
+			slideSelectProps.onMouseLeave = slider.handleMouse('End');
+			slideSelectProps.onTouchStart = slider.handleTouch('Start');
+			slideSelectProps.onTouchMove = slider.handleTouch('Move');
+			slideSelectProps.onTouchEnd = slider.handleTouch('End');
+		}
 		return (
 			<div className="SlideSelectHolder" ref="holder">
 				<div {...slideSelectProps}>
