@@ -105,7 +105,8 @@ var SlideSelect = React.createClass({
 			show: false,
 			useNativeScroll: false,
 			useScrollSnap: false,
-			startDragId: null
+			startDragId: null,
+			resizeFallbackIntervalId: () => {}
 		};
 	},
 	componentDidUpdate(){
@@ -117,17 +118,33 @@ var SlideSelect = React.createClass({
 		}
 	},
 	componentDidMount(){
+		var slider = this;
 		window.addEventListener('resize', this.invalidateDimensions);
-		this.updateDimensions();
+		slider.updateDimensions();
+		slider.setState({
+			resizeFallbackIntervalId: setInterval(() => {
+				slider.fallbackParentSizeWatch();
+			}, 200)
+		});
 	},
 	componentWillUnmount() {
 		window.removeEventListener('resize', this.invalidateDimensions);
 		this.updateDimensions();
+		clearInterval(this.state.resizeFallbackIntervalId);
 	},
 	invalidateDimensions(){
 		this.setState({
 			needsResizeUpdate: true
 		});
+	},
+	fallbackParentSizeWatch(){
+		var slider = this;
+		var holder = ReactDOM.findDOMNode(slider.refs['holder']);
+		var holderWidth = holder ? holder.clientWidth : 0;
+		if (slider.state.holderWidth !== holderWidth) {
+			slider.invalidateDimensions();
+			slider.updateDimensions();
+		}
 	},
 	updateDimensions(){
 		var slider = this;
@@ -149,7 +166,7 @@ var SlideSelect = React.createClass({
 			//Even Modernizr's approach didn't work in all important cases. This is comprehensive _enough_.
 			var supportsTouch = navigator.userAgent.indexOf('Mobile') !== -1;
 			var useNativeScroll = forceNativeScrollFallback || supportsTouch;
-			this.setState({
+			slider.setState({
 				holderWidth: holderWidth,
 				x: slideWidth * slider.state.targetIndex,
 				slideWidth: slideWidth,
