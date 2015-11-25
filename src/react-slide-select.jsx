@@ -165,7 +165,7 @@ var SlideSelect = React.createClass({
 	},
 	createTransition(args){
 		var targetValues = args.targetValues;
-		var duration = args.duration || 2000;
+		var duration = args.duration || 400;
 		var interpolationMethod = args.interpolationMethod || ((k) => {
 				return k
 			});
@@ -176,7 +176,7 @@ var SlideSelect = React.createClass({
 		var propertyName, startTime;
 		var animationCallback = (time) => {
 			startTime = startTime === undefined ? time : startTime;
-			if (startTime >= slider.state.lastAnimationStartTime) {
+			if (startTime >= slider.state.lastAnimationStartTime && slider.state.startDragId === null) {
 				var currentValues = {
 					lastAnimationStartTime: startTime
 				};
