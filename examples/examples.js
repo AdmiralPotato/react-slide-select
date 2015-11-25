@@ -47,7 +47,8 @@
 	__webpack_require__(1);
 	__webpack_require__(5);
 	__webpack_require__(6);
-	module.exports = __webpack_require__(7);
+	__webpack_require__(7);
+	module.exports = __webpack_require__(8);
 
 
 /***/ },
@@ -290,6 +291,64 @@
 	});
 	
 	ReactDOM.render(React.createElement(KittenPickerAndScroller, { data: kittenProductList }), document.getElementById('example-change_index'));
+
+/***/ },
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var React = __webpack_require__(2);
+	var ReactDOM = __webpack_require__(3);
+	var KittenHeroList = __webpack_require__(6);
+	
+	var KittenWidthPicker = React.createClass({
+		displayName: 'KittenWidthPicker',
+		getInitialState: function getInitialState() {
+			return {
+				width: 100
+			};
+		},
+		change: function change(syntheticChangeEvent) {
+			console.log(syntheticChangeEvent);
+			this.setState({
+				width: syntheticChangeEvent.target.value
+			});
+		},
+		getSizeOptions: function getSizeOptions() {
+			var sizeList = [100, 75, 50, 33];
+			var options = sizeList.map(function (item, index) {
+				return React.createElement(
+					'option',
+					{ key: 'option-' + index, value: item },
+					item
+				);
+			});
+			return React.createElement(
+				'select',
+				{ className: 'form-control', onChange: this.change },
+				options
+			);
+		},
+		render: function render() {
+			var widthPicker = this;
+			var props = {
+				style: {
+					margin: '0 auto',
+					width: widthPicker.state.width + '%'
+				}
+			};
+			var sizeOptions = widthPicker.getSizeOptions();
+			return React.createElement(
+				'div',
+				props,
+				sizeOptions,
+				React.createElement(KittenHeroList, { data: kittenProductList })
+			);
+		}
+	});
+	
+	ReactDOM.render(React.createElement(KittenWidthPicker, null), document.getElementById('example-parent_resize'));
 
 /***/ }
 /******/ ]);
