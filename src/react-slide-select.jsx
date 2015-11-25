@@ -100,6 +100,7 @@ var SlideSelect = React.createClass({
 			supportsTouch: false,
 			suppressIndexUpdate: false,
 			howManySlidesFitOnScreenCompletely: 0,
+			lastAnimationStartTime: 0,
 			showArrows: false,
 			show: false,
 			useNativeScroll: false,
@@ -175,23 +176,31 @@ var SlideSelect = React.createClass({
 		var propertyName, startTime;
 		var animationCallback = (time) => {
 			startTime = startTime === undefined ? time : startTime;
-			var currentValues = {};
-			var timeDiff = time - startTime;
-			var progressFraction = interpolationMethod(Math.min(1, Math.max(0, timeDiff / duration)));
-			var propertyName;
-			var propertyDiff;
-			if (progressFraction !== 1) {
-				requestAnimationFrame(animationCallback);
-			} else {
-				requestAnimationFrame(callback);
-			}
-			for (propertyName in targetValues) {
-				if (targetValues.hasOwnProperty(propertyName)) {
-					propertyDiff = targetValues[propertyName] - startValues[propertyName];
-					currentValues[propertyName] = startValues[propertyName] + (propertyDiff * progressFraction);
+			if (startTime >= slider.state.lastAnimationStartTime && slider.state.startDragId === null) {
+				var currentValues = {
+					lastAnimationStartTime: startTime
+				};
+				var timeDiff = time - startTime;
+				var progressFraction = interpolationMethod(Math.min(1, Math.max(0, timeDiff / duration)));
+				var propertyName;
+				var propertyDiff;
+				for (propertyName in targetValues) {
+					if (targetValues.hasOwnProperty(propertyName)) {
+						propertyDiff = targetValues[propertyName] - startValues[propertyName];
+						currentValues[propertyName] = startValues[propertyName] + (propertyDiff * progressFraction);
+					}
 				}
+				slider.setState(
+					currentValues,
+					() => {
+						if (progressFraction !== 1) {
+							requestAnimationFrame(animationCallback);
+						} else {
+							requestAnimationFrame(callback);
+						}
+					}
+				);
 			}
-			slider.setState(currentValues);
 		};
 		for (propertyName in targetValues) {
 			if (targetValues.hasOwnProperty(propertyName)) {
