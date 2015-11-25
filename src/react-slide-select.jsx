@@ -363,19 +363,6 @@ var SlideSelect = React.createClass({
 		var sign = (xDiff / Math.abs(xDiff));
 		return isNaN(sign) ? 0 : sign;
 	},
-	getTouchDataByStateId(event){
-		var slider = this;
-		var touches = event.changedTouches;
-		var result = null;
-		for (var i = 0; i < touches.length; i++) {
-			var touch = touches[i];
-			if (touch.identifier === slider.state.startTouchId) {
-				result = touch;
-				break;
-			}
-		}
-		return result;
-	},
 	handleTouchStart(syntheticTouchEvent) {
 		var slider = this;
 		if (slider.state.useScrollSnap) {
@@ -398,41 +385,92 @@ var SlideSelect = React.createClass({
 	handleTouchMove(syntheticTouchEvent){
 		syntheticTouchEvent.persist();
 		var slider = this;
-		if (slider.state.useScrollSnap) {
-			var touch = slider.getTouchDataByStateId(syntheticTouchEvent);
-			if (touch) {
-				if (Math.abs(touch.screenY - slider.state.startY) < 50) {
-					syntheticTouchEvent.preventDefault();
-					var x = slider.getAbsoluteXFromRelativeTouch(touch);
-					slider.setState({
-						x: x
-					});
-				}
+		var touch = slider.getTouchDataByStateId(syntheticTouchEvent);
+		if (touch) {
+			if (Math.abs(touch.screenY - slider.state.startY) < 50) {
+				syntheticTouchEvent.preventDefault();
+				var x = slider.getAbsoluteXFromRelativeTouch(touch);
+				slider.setState({
+					x: x
+				});
 			}
 		}
 	},
-	handleTouchEnd(syntheticTouchEvent) {
+	scrollEnd(pointer){
 		var slider = this;
-		if (slider.state.useScrollSnap) {
-			var touch = slider.getTouchDataByStateId(syntheticTouchEvent);
-			if (touch) {
-				var newState = {
-					startTouchId: null
-				};
-				if (Math.abs(touch.screenY - slider.state.startY) < 50) {
-					syntheticTouchEvent.preventDefault();
-					var x = slider.getAbsoluteXFromRelativeTouch(touch);
-					newState.x = x;
-					newState.scrollDirection = slider.getRelativeScrollDirection(x)
-				} else {
-					newState.scrollDirection = 0;
-				}
-				slider.setState(
-					newState,
-					() => {
-						slider.snapToNearestSlideIndexOnScrollStop();
-					}
-				);
+		var newState = {
+			startTouchId: null
+		};
+		if (Math.abs(pointer.y - slider.state.startY) < 50) {
+			pointer.preventDefault();
+			var x = slider.getAbsoluteXFromRelativeTouch(pointer);
+			newState.x = x;
+			newState.scrollDirection = slider.getRelativeScrollDirection(x)
+		} else {
+			newState.scrollDirection = 0;
+		}
+		slider.setState(
+			newState,
+			() => {
+				slider.snapToNearestSlideIndexOnScrollStop();
+			}
+		);
+	},
+	getPointByTouch(syntheticTouchEvent){
+		var slider = this;
+		var touches = syntheticTouchEvent.changedTouches;
+		var result = null;
+		for (var i = 0; i < touches.length; i++) {
+			var touch = touches[i];
+			if (touch.identifier === slider.state.startTouchId) {
+				result = touch;
+				break;
+			}
+		}
+		return {x: ???, y: ???};
+	},
+	getPointByMouse(){
+		return {x: ???, y: ???};
+	},
+	handleMouseUp(syntheticMouseEvent) {
+		if (this.state.useScrollSnap) {
+			var pointer = this.getPointByMouse(syntheticMouseEvent);
+			this.scrollEnd(pointer);
+		}
+	},
+	handleMouseDown(syntheticMouseEvent) {
+		if (this.state.useScrollSnap) {
+			var pointer = this.getPointByMouse(syntheticMouseEvent);
+			this.scrollStart(pointer);
+		}
+	},
+	handleMouseMove(syntheticMouseEvent) {
+		if (this.state.useScrollSnap) {
+			var pointer = this.getPointByMouse(syntheticMouseEvent);
+			this.scrollMove(pointer);
+		}
+	},
+	handleTouchEnd(syntheticTouchEvent) {
+		if (this.state.useScrollSnap) {
+			var pointer = this.getPointByTouch(syntheticTouchEvent);
+			if (pointer) {
+				this.scrollEnd(pointer);
+			}
+		}
+	},
+	handleTouchStart(syntheticTouchEvent) {
+		if (this.state.useScrollSnap) {
+			var pointer = this.getPointByTouch(syntheticTouchEvent);
+			if (pointer) {
+				this.scrollStart(pointer);
+			}
+		}
+	},
+	handleTouchMove(syntheticTouchEvent) {
+		if (this.state.useScrollSnap) {
+			var pointer = this.getPointByTouch(syntheticTouchEvent);
+			if (pointer) {
+				this.scrollMove(pointer);
 			}
 		}
 	},
