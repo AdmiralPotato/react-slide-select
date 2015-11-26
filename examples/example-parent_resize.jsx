@@ -1,6 +1,7 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
 var KittenHeroList = require('./example-hero.jsx');
+var KittenPicker = require('./example-custom_children.jsx');
 
 var KittenWidthPicker = React.createClass({
 	getInitialState(){
@@ -9,10 +10,22 @@ var KittenWidthPicker = React.createClass({
 		};
 	},
 	change(syntheticChangeEvent){
+		var widthPicker = this;
 		console.log(syntheticChangeEvent);
-		this.setState({
-			width: syntheticChangeEvent.target.value
-		});
+		widthPicker.setState({
+				width: syntheticChangeEvent.target.value,
+				display: 'none'
+			},
+			()=> {
+				setTimeout(
+					()=> {
+						widthPicker.setState({
+							display: 'block'
+						})
+					},
+					1000
+				);
+			});
 	},
 	getSizeOptions(){
 		var sizeList = [100, 75, 50, 33];
@@ -29,6 +42,7 @@ var KittenWidthPicker = React.createClass({
 		var widthPicker = this;
 		var props = {
 			style: {
+				display: widthPicker.state.display,
 				margin: '0 auto',
 				width: `${widthPicker.state.width}%`
 			}
@@ -37,7 +51,7 @@ var KittenWidthPicker = React.createClass({
 		return (
 			<div {...props}>
 				{sizeOptions}
-				<KittenHeroList data={kittenProductList}/>
+				<KittenPicker data={kittenProductList}/>
 			</div>
 		);
 	}

@@ -301,6 +301,7 @@
 	var React = __webpack_require__(2);
 	var ReactDOM = __webpack_require__(3);
 	var KittenHeroList = __webpack_require__(6);
+	var KittenPicker = __webpack_require__(5);
 	
 	var KittenWidthPicker = React.createClass({
 		displayName: 'KittenWidthPicker',
@@ -310,9 +311,17 @@
 			};
 		},
 		change: function change(syntheticChangeEvent) {
+			var widthPicker = this;
 			console.log(syntheticChangeEvent);
-			this.setState({
-				width: syntheticChangeEvent.target.value
+			widthPicker.setState({
+				width: syntheticChangeEvent.target.value,
+				display: 'none'
+			}, function () {
+				setTimeout(function () {
+					widthPicker.setState({
+						display: 'block'
+					});
+				}, 1000);
 			});
 		},
 		getSizeOptions: function getSizeOptions() {
@@ -334,6 +343,7 @@
 			var widthPicker = this;
 			var props = {
 				style: {
+					display: widthPicker.state.display,
 					margin: '0 auto',
 					width: widthPicker.state.width + '%'
 				}
@@ -343,7 +353,7 @@
 				'div',
 				props,
 				sizeOptions,
-				React.createElement(KittenHeroList, { data: kittenProductList })
+				React.createElement(KittenPicker, { data: kittenProductList })
 			);
 		}
 	});
