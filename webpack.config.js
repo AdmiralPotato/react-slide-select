@@ -52,7 +52,8 @@ module.exports = [
 				'./examples/example-product',
 				'./examples/example-custom_children',
 				'./examples/example-hero',
-				'./examples/example-change_index'
+				'./examples/example-change_index',
+				'./examples/example-parent_resize'
 			]
 		},
 		output: {

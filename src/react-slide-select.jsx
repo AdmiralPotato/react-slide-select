@@ -105,7 +105,8 @@ var SlideSelect = React.createClass({
 			show: false,
 			useNativeScroll: false,
 			useScrollSnap: false,
-			startDragId: null
+			startDragId: null,
+			resizeFallbackIntervalId: () => {}
 		};
 	},
 	componentDidUpdate(){
@@ -117,17 +118,35 @@ var SlideSelect = React.createClass({
 		}
 	},
 	componentDidMount(){
-		window.addEventListener('resize', this.invalidateDimensions);
-		this.updateDimensions();
+		var slider = this;
+		window.addEventListener('resize', slider.invalidateDimensions);
+		slider.updateDimensions();
+		slider.setState({
+			resizeFallbackIntervalId: setInterval(() => {
+				slider.fallbackStateUpdate();
+			}, 200)
+		});
 	},
 	componentWillUnmount() {
 		window.removeEventListener('resize', this.invalidateDimensions);
 		this.updateDimensions();
+		clearInterval(this.state.resizeFallbackIntervalId);
 	},
 	invalidateDimensions(){
 		this.setState({
 			needsResizeUpdate: true
 		});
+	},
+	fallbackStateUpdate(){
+		var slider = this;
+		var holder = ReactDOM.findDOMNode(slider.refs['holder']);
+		var holderWidth = holder ? holder.clientWidth : 0;
+		var holderWidthHasChanged = slider.state.holderWidth !== holderWidth;
+		var numberOfChildrenHasChanged = slider.state.numSlides !== React.Children.count(slider.props.children);
+		if (holderWidthHasChanged || numberOfChildrenHasChanged) {
+			slider.invalidateDimensions();
+			slider.updateDimensions();
+		}
 	},
 	updateDimensions(){
 		var slider = this;
@@ -135,10 +154,11 @@ var SlideSelect = React.createClass({
 		if (slider.state.needsResizeUpdate) {
 			var holder = ReactDOM.findDOMNode(slider.refs['holder']);
 			var holderWidth = holder ? holder.clientWidth : 0;
+			var numSlides = React.Children.count(slider.props.children);
 			var slideWidthRatio = slider.getSlideWidthRatio(holderWidth);
 			var slideWidth = Math.floor(holderWidth * slideWidthRatio);
 			var howManySlidesFitOnScreenCompletely = Math.floor(holderWidth / slideWidth);
-			var contentWidth = slideWidth * slider.state.numSlides;
+			var contentWidth = slideWidth * numSlides;
 			var doWeHaveEnoughContentToScroll = contentWidth > holderWidth;
 			var showDotsAtBreakpoint = slider.getPropertiesAtBreakpoint(holderWidth).showDots;
 			var showDots = slider.props.showDots && (slider.props.fullWidth || (showDotsAtBreakpoint && doWeHaveEnoughContentToScroll));
@@ -149,9 +169,10 @@ var SlideSelect = React.createClass({
 			//Even Modernizr's approach didn't work in all important cases. This is comprehensive _enough_.
 			var supportsTouch = navigator.userAgent.indexOf('Mobile') !== -1;
 			var useNativeScroll = forceNativeScrollFallback || supportsTouch;
-			this.setState({
+			slider.setState({
 				holderWidth: holderWidth,
 				x: slideWidth * slider.state.targetIndex,
+				numSlides: numSlides,
 				slideWidth: slideWidth,
 				contentWidth: contentWidth,
 				needsResizeUpdate: false,
