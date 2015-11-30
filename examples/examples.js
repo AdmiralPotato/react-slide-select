@@ -300,7 +300,6 @@
 	
 	var React = __webpack_require__(2);
 	var ReactDOM = __webpack_require__(3);
-	var KittenHeroList = __webpack_require__(6);
 	var KittenPicker = __webpack_require__(5);
 	
 	var KittenWidthPicker = React.createClass({
@@ -321,7 +320,7 @@
 					widthPicker.setState({
 						display: 'block'
 					});
-				}, 1000);
+				}, 500);
 			});
 		},
 		getSizeOptions: function getSizeOptions() {
@@ -343,6 +342,7 @@
 			var widthPicker = this;
 			var props = {
 				style: {
+					className: 'KittenWidthPicker',
 					display: widthPicker.state.display,
 					margin: '0 auto',
 					width: widthPicker.state.width + '%'

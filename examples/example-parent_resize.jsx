@@ -1,6 +1,5 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
-var KittenHeroList = require('./example-hero.jsx');
 var KittenPicker = require('./example-custom_children.jsx');
 
 var KittenWidthPicker = React.createClass({
@@ -23,7 +22,7 @@ var KittenWidthPicker = React.createClass({
 							display: 'block'
 						})
 					},
-					1000
+					500
 				);
 			});
 	},
@@ -42,6 +41,7 @@ var KittenWidthPicker = React.createClass({
 		var widthPicker = this;
 		var props = {
 			style: {
+				className: 'KittenWidthPicker',
 				display: widthPicker.state.display,
 				margin: '0 auto',
 				width: `${widthPicker.state.width}%`
