@@ -106,7 +106,7 @@ var SlideSelect = React.createClass({
 			useNativeScroll: false,
 			useScrollSnap: false,
 			startDragId: null,
-			resizeFallbackIntervalId: () => {}
+			resizeFallbackIntervalId: null
 		};
 	},
 	componentDidUpdate(){
@@ -511,7 +511,8 @@ var SlideSelect = React.createClass({
 		var slideSelectProps = {
 			ref: 'slider',
 			className: className.join(' '),
-			onScroll: slider.handleScroll
+			onScroll: slider.handleScroll,
+			key: 'SlideSelect-' + slider.state.holderWidth
 		};
 		if (slider.state.useScrollSnap) {
 			slideSelectProps.onMouseDown = slider.handleMouse('Start');
