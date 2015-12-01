@@ -106,6 +106,7 @@ var SlideSelect = React.createClass({
 			useNativeScroll: false,
 			useScrollSnap: false,
 			startDragId: null,
+			isSwiping: null,
 			resizeFallbackIntervalId: null
 		};
 	},
@@ -197,7 +198,7 @@ var SlideSelect = React.createClass({
 		var propertyName, startTime;
 		var animationCallback = (time) => {
 			startTime = startTime === undefined ? time : startTime;
-			if (startTime >= slider.state.lastAnimationStartTime && slider.state.startDragId === null) {
+			if (startTime >= slider.state.lastAnimationStartTime && !slider.state.isSwiping) {
 				var currentValues = {
 					lastAnimationStartTime: startTime
 				};
@@ -406,38 +407,43 @@ var SlideSelect = React.createClass({
 		var slider = this;
 		return slider.state.startX + (slider.state.startDragX - x);
 	},
+	determineIfSwipingByPoint(point) {
+		var x = Math.abs(point.x - this.state.startDragX);
+		var y = Math.abs(point.y - this.state.startDragY);
+		return x > y;
+	},
 	dragMove(point, event){
-		event.persist();
 		var slider = this;
-		if (Math.abs(point.y - slider.state.startDragY) < 50) {
-			event.preventDefault();
-			var x = slider.getAbsoluteXFromRelativeX(point.x);
-			slider.setState({
-				x: x
-			});
+		var newState = {
+			isSwiping: slider.state.isSwiping
+		};
+		if (slider.state.isSwiping === null) {
+			newState.isSwiping = slider.determineIfSwipingByPoint(point);
 		}
+		if (newState.isSwiping) {
+			event.preventDefault();
+			newState.x = slider.getAbsoluteXFromRelativeX(point.x);
+		}
+		slider.setState(newState);
 	},
 	dragEnd(point, event){
 		var slider = this;
-		if (slider.state.startDragId !== null) {
-			var newState = {
-				startDragId: null
+		var newState = {
+			startDragId: null,
+			isSwiping: null
+		};
+		var callback = null;
+		if (slider.state.isSwiping) {
+			newState.x = slider.getAbsoluteXFromRelativeX(point.x);
+			newState.scrollDirection = slider.getRelativeDragDirection(newState.x);
+			callback = () => {
+				slider.snapToNearestSlideIndexOnScrollStop();
 			};
-			if (Math.abs(point.y - slider.state.startDragY) < 50) {
-				event.preventDefault();
-				var x = slider.getAbsoluteXFromRelativeX(point.x);
-				newState.x = x;
-				newState.scrollDirection = slider.getRelativeDragDirection(x)
-			} else {
-				newState.scrollDirection = 0;
-			}
-			slider.setState(
-				newState,
-				() => {
-					slider.snapToNearestSlideIndexOnScrollStop();
-				}
-			);
 		}
+		slider.setState(
+			newState,
+			callback
+		);
 	},
 	getPointByTouch(syntheticTouchEvent){
 		var slider = this;
@@ -458,7 +464,7 @@ var SlideSelect = React.createClass({
 		if (result) {
 			point = {
 				x: result.clientX,
-				y: result.screenY,
+				y: result.clientY,
 				id: result.identifier
 			};
 		}
