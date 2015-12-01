@@ -303,7 +303,11 @@ var SlideSelect = React.createClass({
 			}
 		};
 		if (slider.state.useScrollSnap) {
-			sliderProps.style.transform = `translate3d(${-slider.state.x}px, 0, 0)`;
+			var translate = `translate3d(${-slider.state.x}px, 0, 0)`;
+			sliderProps.style.WebkitTransform = translate;
+			sliderProps.style.MozTransform = translate;
+			sliderProps.style.MsTransform = translate;
+			sliderProps.style.transform = translate;
 		}
 		if (slider.state.numSlides < 1) {
 			throw new Error('You must pass children to the SlideSelect component.');
