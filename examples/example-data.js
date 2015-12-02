@@ -30,6 +30,26 @@ var kittenProductList = [
 	{
 		photoId: '7837150408',
 		name: 'Sad Dust Bunny Kitten'
+	},
+	{
+		photoId: '2771212406',
+		name: 'Tree Kitten'
+	},
+	{
+		photoId: '7141636517',
+		name: 'Short Haired Kitten'
+	},
+	{
+		photoId: '15523537685',
+		name: 'Depth of Field Kitten'
+	},
+	{
+		photoId: '8674403403',
+		name: 'Spooky Kitten'
+	},
+	{
+		photoId: '17249256835',
+		name: 'Anti-gravity Kitten'
 	}
 ];
 
