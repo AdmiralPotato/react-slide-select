@@ -48,7 +48,8 @@
 	__webpack_require__(5);
 	__webpack_require__(6);
 	__webpack_require__(7);
-	module.exports = __webpack_require__(8);
+	__webpack_require__(8);
+	module.exports = __webpack_require__(9);
 
 
 /***/ },
@@ -341,8 +342,8 @@
 		render: function render() {
 			var widthPicker = this;
 			var props = {
+				className: 'KittenWidthPicker',
 				style: {
-					className: 'KittenWidthPicker',
 					display: widthPicker.state.display,
 					margin: '0 auto',
 					width: widthPicker.state.width + '%'
@@ -359,6 +360,72 @@
 	});
 	
 	ReactDOM.render(React.createElement(KittenWidthPicker, null), document.getElementById('example-parent_resize'));
+
+/***/ },
+/* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var React = __webpack_require__(2);
+	var ReactDOM = __webpack_require__(3);
+	var KittenPicker = __webpack_require__(5);
+	
+	var KittenCountPicker = React.createClass({
+		displayName: 'KittenCountPicker',
+		getDefaultProps: function getDefaultProps() {
+			return {
+				data: []
+			};
+		},
+		getInitialState: function getInitialState() {
+			return {
+				count: this.props.data.length
+			};
+		},
+		change: function change(syntheticChangeEvent) {
+			var countPicker = this;
+			console.log(syntheticChangeEvent);
+			countPicker.setState({
+				count: syntheticChangeEvent.target.value,
+				display: 'none'
+			});
+		},
+		getSizeOptions: function getSizeOptions() {
+			var countPicker = this;
+			var allKittens = countPicker.props.data.length;
+			var sizeList = [1, 2, 3, 4, 5, 6, 8, allKittens].reverse();
+			var options = sizeList.map(function (item, index) {
+				return React.createElement(
+					'option',
+					{ key: 'option-' + index, value: item },
+					item
+				);
+			});
+			return React.createElement(
+				'select',
+				{ className: 'form-control', onChange: this.change },
+				options
+			);
+		},
+		render: function render() {
+			var countPicker = this;
+			var props = {
+				className: 'KittenCountPicker'
+			};
+			var sizeOptions = countPicker.getSizeOptions();
+			var limitedKittenList = countPicker.props.data.slice();
+			limitedKittenList.length = countPicker.state.count;
+			return React.createElement(
+				'div',
+				props,
+				sizeOptions,
+				React.createElement(KittenPicker, { data: limitedKittenList })
+			);
+		}
+	});
+	
+	ReactDOM.render(React.createElement(KittenCountPicker, { data: kittenProductList }), document.getElementById('example-children_change'));
 
 /***/ }
 /******/ ]);
