@@ -557,7 +557,7 @@ var SlideSelect = React.createClass({
 			ref: 'slider',
 			className: className.join(' '),
 			onScroll: slider.handleScroll,
-			key: 'SlideSelect-' + slider.state.holderWidth
+			key: `SlideSelect-${slider.state.holderWidth}-${slider.state.numSlides}`
 		};
 		if (!slider.state.useNativeScroll && !slider.state.useScrollSnap) {
 			slideSelectProps.onDragStart = slider.handleDrag('Start');
