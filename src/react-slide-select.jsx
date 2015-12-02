@@ -176,6 +176,7 @@ var SlideSelect = React.createClass({
 				numSlides: numSlides,
 				slideWidth: slideWidth,
 				contentWidth: contentWidth,
+				maxScrollPosition: contentWidth - holderWidth,
 				needsResizeUpdate: false,
 				howManySlidesFitOnScreenCompletely: howManySlidesFitOnScreenCompletely,
 				showArrows: showArrows,
@@ -309,6 +310,9 @@ var SlideSelect = React.createClass({
 			sliderProps.style.MsTransform = translate;
 			sliderProps.style.transform = translate;
 		}
+		if (!slider.state.useNativeScroll && !slider.state.useScrollSnap) {
+			sliderProps.draggable = true;
+		}
 		if (slider.state.numSlides < 1) {
 			throw new Error('You must pass children to the SlideSelect component.');
 		}
@@ -379,7 +383,7 @@ var SlideSelect = React.createClass({
 	handleScroll(syntheticScrollEvent) {
 		var slider = this;
 		var x = syntheticScrollEvent.nativeEvent.target.scrollLeft;
-		var maximumScrollPosition = slider.state.contentWidth - slider.state.holderWidth;
+		var maximumScrollPosition = slider.state.maxScrollPosition;
 		var scrollCompletionRatio = x / maximumScrollPosition;
 		//don't allow scroll bounce to set state
 		if (x >= 0 && x <= maximumScrollPosition) {
@@ -400,12 +404,14 @@ var SlideSelect = React.createClass({
 	},
 	dragStart(point) {
 		var slider = this;
-		slider.setState({
-			startDragId: point.id,
-			startDragX: point.x,
-			startDragY: point.y,
-			startX: slider.state.x
-		});
+		slider.setState(
+			{
+				startDragId: point.id,
+				startDragX: point.x,
+				startDragY: point.y,
+				startX: slider.state.x
+			}
+		);
 	},
 	getAbsoluteXFromRelativeX(x){
 		var slider = this;
@@ -449,6 +455,23 @@ var SlideSelect = React.createClass({
 			callback
 		);
 	},
+	dragEndWithoutSnap(point, event){
+		var slider = this;
+		var newState = {
+			startDragId: null,
+			isSwiping: null
+		};
+		if (slider.state.isSwiping) {
+			newState.x = slider.boundValue(
+				0,
+				slider.state.maxScrollPosition,
+				slider.getAbsoluteXFromRelativeX(point.x)
+			);
+		}
+		slider.setState(
+			newState
+		);
+	},
 	getPointByTouch(syntheticTouchEvent){
 		var slider = this;
 		var touches = syntheticTouchEvent.changedTouches;
@@ -475,11 +498,13 @@ var SlideSelect = React.createClass({
 		return point;
 	},
 	getPointByMouse(syntheticMouseEvent){
+		var slider = this;
 		var result = null;
 		var button = syntheticMouseEvent.buttons;
 		var isNotMoveEvent = syntheticMouseEvent.type !== 'mousemove';
 		var isMoveEventAndMouseDown = syntheticMouseEvent.type === 'mousemove' && (button === 1 || button === 4);
-		if (isNotMoveEvent || isMoveEventAndMouseDown) {
+		var haveWeReceivedStartEventYet = isMoveEventAndMouseDown && slider.state.startDragId !== null;
+		if (isNotMoveEvent || haveWeReceivedStartEventYet) {
 			result = {
 				x: syntheticMouseEvent.clientX,
 				y: 0, //we're not scrolling the page Y with this device, never report
@@ -487,6 +512,16 @@ var SlideSelect = React.createClass({
 			};
 		}
 		return result;
+	},
+	handleDrag(eventName){
+		var slider = this;
+		return (syntheticDragEvent) => {
+			syntheticDragEvent.preventDefault();
+			var point = slider.getPointByMouse(syntheticDragEvent);
+			if (point) {
+				slider[`drag${eventName}`](point, syntheticDragEvent);
+			}
+		};
 	},
 	handleMouse(eventName){
 		var slider = this;
@@ -524,6 +559,13 @@ var SlideSelect = React.createClass({
 			onScroll: slider.handleScroll,
 			key: 'SlideSelect-' + slider.state.holderWidth
 		};
+		if (!slider.state.useNativeScroll && !slider.state.useScrollSnap) {
+			slideSelectProps.onDragStart = slider.handleDrag('Start');
+			slideSelectProps.onDragEnd = slider.handleDrag('EndWithoutSnap');
+			slideSelectProps.onMouseMove = slider.handleMouse('Move');
+			slideSelectProps.onMouseUp = slider.handleMouse('EndWithoutSnap');
+			slideSelectProps.onMouseLeave = slider.handleMouse('EndWithoutSnap');
+		}
 		if (slider.state.useScrollSnap) {
 			slideSelectProps.onMouseDown = slider.handleMouse('Start');
 			slideSelectProps.onMouseMove = slider.handleMouse('Move');
