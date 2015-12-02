@@ -342,8 +342,8 @@
 		render: function render() {
 			var widthPicker = this;
 			var props = {
+				className: 'KittenWidthPicker',
 				style: {
-					className: 'KittenWidthPicker',
 					display: widthPicker.state.display,
 					margin: '0 auto',
 					width: widthPicker.state.width + '%'
@@ -394,7 +394,7 @@
 		getSizeOptions: function getSizeOptions() {
 			var countPicker = this;
 			var allKittens = countPicker.props.data.length;
-			var sizeList = [1, 2, 4, 8, allKittens].reverse();
+			var sizeList = [1, 2, 3, 4, 5, 6, 8, allKittens].reverse();
 			var options = sizeList.map(function (item, index) {
 				return React.createElement(
 					'option',
@@ -411,9 +411,7 @@
 		render: function render() {
 			var countPicker = this;
 			var props = {
-				style: {
-					className: 'KittenCountPicker'
-				}
+				className: 'KittenCountPicker'
 			};
 			var sizeOptions = countPicker.getSizeOptions();
 			var limitedKittenList = countPicker.props.data.slice();

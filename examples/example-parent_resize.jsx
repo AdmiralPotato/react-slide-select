@@ -40,8 +40,8 @@ var KittenWidthPicker = React.createClass({
 	render(){
 		var widthPicker = this;
 		var props = {
+			className: 'KittenWidthPicker',
 			style: {
-				className: 'KittenWidthPicker',
 				display: widthPicker.state.display,
 				margin: '0 auto',
 				width: `${widthPicker.state.width}%`

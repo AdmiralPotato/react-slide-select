@@ -24,7 +24,7 @@ var KittenCountPicker = React.createClass({
 	getSizeOptions(){
 		var countPicker = this;
 		var allKittens = countPicker.props.data.length;
-		var sizeList = [1, 2, 4, 8, allKittens].reverse();
+		var sizeList = [1, 2, 3, 4, 5, 6, 8, allKittens].reverse();
 		var options = sizeList.map((item, index) => {
 			return <option key={`option-${index}`} value={item}>{item}</option>;
 		});
@@ -37,9 +37,7 @@ var KittenCountPicker = React.createClass({
 	render(){
 		var countPicker = this;
 		var props = {
-			style: {
-				className: 'KittenCountPicker'
-			}
+			className: 'KittenCountPicker'
 		};
 		var sizeOptions = countPicker.getSizeOptions();
 		var limitedKittenList = countPicker.props.data.slice();
