@@ -1,13 +1,28 @@
 {
   "name": "react-slide-select",
-  "version": "0.0.1",
-  "description": "",
+  "version": "0.1.0",
+  "description": "A React flavored Slider/Carousel for Desktop and Mobile. Specifically focused on the KISS principle.",
   "main": "lib/react-slide-select.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AdmiralPotato/react-slide-select"
+  },
+  "author": "Admiral Potato",
+  "contributors": [
+    {
+      "name": "Admiral Potato",
+      "email": "admiral@nuclearpixel.com",
+      "url": "http://nuclearpixel.com/"
+    },
+    {
+      "name": "Mike Easley",
+      "email": "mike.easley@gmail.com"
+    }
+  ],
   "scripts": {
     "buildSimple": "babel ./src --out-dir ./lib --presets react,es2015 --source-maps && node-sass ./src -o ./lib",
     "build": "webpack && node-sass ./src -o ./lib"
   },
-  "author": "Admiral Potato, Mike Easley",
   "license": "MIT",
   "devDependencies": {
     "babel-cli": "^6.1.2",
@@ -21,5 +36,14 @@
   "dependencies": {
     "react": "^0.14.2",
     "react-dom": "^0.14.2"
-  }
+  },
+  "keywords": [
+    "react",
+    "slider",
+    "carousel",
+    "responsive",
+    "react-component",
+    "desktop",
+    "mobile"
+  ]
 }
