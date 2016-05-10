@@ -54,7 +54,8 @@ module.exports = [
 				'./examples/example-hero',
 				'./examples/example-change_index',
 				'./examples/example-parent_resize',
-				'./examples/example-children_change'
+				'./examples/example-children_change',
+				'./examples/example-fullwidth_setindex'
 			]
 		},
 		output: {
