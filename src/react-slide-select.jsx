@@ -262,6 +262,18 @@ var SlideSelect = React.createClass({
 			}
 		});
 	},
+	setIndex(index){
+		var slider = this;
+		slider.setState(
+			{
+				targetIndex: index,
+				needsResizeUpdate: true
+			},
+			() => {
+				slider.updateDimensions();
+			}
+		);
+	},
 	prevNext(direction){
 		var slider = this;
 		var index = Math.max(

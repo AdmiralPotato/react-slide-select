@@ -49,7 +49,8 @@
 	__webpack_require__(6);
 	__webpack_require__(7);
 	__webpack_require__(8);
-	module.exports = __webpack_require__(9);
+	__webpack_require__(9);
+	module.exports = __webpack_require__(10);
 
 
 /***/ },
@@ -144,7 +145,6 @@
 	};
 	
 	var KittenPicker = React.createClass({
-		displayName: 'KittenPicker',
 		getDefaultProps: function getDefaultProps() {
 			return {
 				data: [],
@@ -225,7 +225,6 @@
 	};
 	
 	var KittenHeroList = React.createClass({
-		displayName: 'KittenHeroList',
 		changeIndex: function changeIndex(index) {
 			this.refs.slider.changeIndex(index);
 		},
@@ -271,7 +270,6 @@
 	var KittenPicker = __webpack_require__(5);
 	
 	var KittenPickerAndScroller = React.createClass({
-		displayName: 'KittenPickerAndScroller',
 		getDefaultProps: function getDefaultProps() {
 			return { data: [] };
 		},
@@ -304,7 +302,6 @@
 	var KittenPicker = __webpack_require__(5);
 	
 	var KittenWidthPicker = React.createClass({
-		displayName: 'KittenWidthPicker',
 		getInitialState: function getInitialState() {
 			return {
 				width: 100
@@ -372,7 +369,6 @@
 	var KittenPicker = __webpack_require__(5);
 	
 	var KittenCountPicker = React.createClass({
-		displayName: 'KittenCountPicker',
 		getDefaultProps: function getDefaultProps() {
 			return {
 				data: []
@@ -426,6 +422,98 @@
 	});
 	
 	ReactDOM.render(React.createElement(KittenCountPicker, { data: kittenProductList }), document.getElementById('example-children_change'));
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var React = __webpack_require__(2);
+	var ReactDOM = __webpack_require__(3);
+	var KittenHeroList = __webpack_require__(6);
+	var KittenPicker = __webpack_require__(5);
+	
+	var KittenHero = function KittenHero(props) {
+	  return React.createElement(
+	    'div',
+	    {
+	      className: 'hero',
+	      style: {
+	        backgroundImage: 'url(\'' + props.data.large + '\')'
+	      }
+	    },
+	    props.data.name
+	  );
+	};
+	
+	var SetIndexKitten = React.createClass({
+	  getInitialState: function getInitialState() {
+	    return {
+	      count: 0
+	    };
+	  },
+	  getDefaultProps: function getDefaultProps() {
+	    return { data: [] };
+	  },
+	  change: function change(syntheticChangeEvent) {
+	    this.setState({
+	      count: syntheticChangeEvent.target.value
+	    });
+	    var number = parseInt(syntheticChangeEvent.target.value, 10);
+	    this.handleSelect(number);
+	  },
+	  getSizeOptions: function getSizeOptions() {
+	    var allKittens = this.props.data;
+	    var options = allKittens.map(function (item, index) {
+	      return React.createElement(
+	        'option',
+	        { key: 'setindex-option-' + index, value: index },
+	        index
+	      );
+	    });
+	    return React.createElement(
+	      'select',
+	      { className: 'form-control', value: this.state.count, onChange: this.change },
+	      options
+	    );
+	  },
+	  handleSelect: function handleSelect(index) {
+	    this.refs["setIndexList"].setIndex(index);
+	  },
+	  render: function render() {
+	    var options = this.getSizeOptions();
+	    var props = this.props;
+	    var heroList = props.data.map(function (item, index) {
+	      var itemProps = {
+	        key: 'setindex-hero-' + index,
+	        data: item
+	      };
+	      return React.createElement(KittenHero, itemProps);
+	    });
+	    return React.createElement(
+	      'div',
+	      { className: 'KittenHeroList' },
+	      React.createElement(
+	        'p',
+	        null,
+	        options
+	      ),
+	      React.createElement(
+	        SlideSelect,
+	        {
+	          ref: 'setIndexList',
+	          showDots: true,
+	          showArrows: true,
+	          fullWidth: true
+	        },
+	        heroList
+	      )
+	    );
+	  }
+	});
+	
+	ReactDOM.render(React.createElement(SetIndexKitten, { data: kittenProductList }), document.getElementById('example-fullwidth_setIndex'));
 
 /***/ }
 /******/ ]);

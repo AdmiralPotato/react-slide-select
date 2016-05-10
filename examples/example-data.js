@@ -1,6 +1,6 @@
 var kittenProductList = [
 	{
-		photoId: '8043720291',
+		photoId: '4743607839',
 		name: 'Rainbow Kitten'
 	},
 	{
